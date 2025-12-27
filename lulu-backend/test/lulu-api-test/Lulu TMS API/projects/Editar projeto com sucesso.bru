@@ -1,0 +1,97 @@
+meta {
+  name: Editar projeto com sucesso
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/projects/{{projectId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "title": "Projeto Editado {{$timestamp}}",
+    "slug": "projeto-editado-{{$timestamp}}",
+    "description": "Descrição editada do projeto"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+  testEmail: test.project.edit@example.com
+  testPassword: senhaSegura123
+}
+
+script:pre-request {
+  const email = bru.getVar("testEmail");
+  const password = bru.getVar("testPassword");
+  try {
+    const createUserResponse = await bru.post("{{baseUrl}}/users", {
+      body: {
+        name: "Usuário Teste Edit",
+        email: email,
+        password: password
+      },
+      options: {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    });
+    if (createUserResponse.status === 201 || createUserResponse.status === 409) {
+      const loginResponse = await bru.post("{{baseUrl}}/auth/login", {
+        body: {
+          email: email,
+          password: password
+        },
+        options: {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      });
+      if (loginResponse.status === 200) {
+        const loginBody = loginResponse.body;
+        bru.setVar("token", loginBody.token);
+        const createProjectResponse = await bru.post("{{baseUrl}}/projects", {
+          body: {
+            title: "Projeto para Editar",
+            slug: "projeto-para-editar-" + Date.now(),
+            description: "Projeto original"
+          },
+          options: {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + loginBody.token
+            }
+          }
+        });
+        if (createProjectResponse.status === 201) {
+          bru.setVar("projectId", createProjectResponse.body.id);
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Erro no pré-script:", err);
+  }
+}
+
+tests {
+  test("deve editar projeto com sucesso", () => {
+    expect(res.getStatus()).to.equal(200);
+    const responseBody = res.getBody();
+    expect(responseBody).to.be.an('object');
+    expect(responseBody).to.have.property('id');
+    expect(responseBody).to.have.property('title');
+    expect(responseBody.title).to.include('Editado');
+    expect(responseBody).to.have.property('slug');
+    expect(responseBody).to.have.property('description');
+  });
+}
+

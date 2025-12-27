@@ -1,0 +1,76 @@
+meta {
+  name: Tentar criar pasta em projeto inexistente
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/folders
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "title": "Pasta Teste",
+    "projectId": "00000000-0000-0000-0000-000000000000"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+  testEmail: test.folder.notfound@example.com
+  testPassword: senhaSegura123
+}
+
+script:pre-request {
+  const email = bru.getVar("testEmail");
+  const password = bru.getVar("testPassword");
+  try {
+    const createUserResponse = await bru.post("{{baseUrl}}/users", {
+      body: {
+        name: "Usuário Teste NotFound",
+        email: email,
+        password: password
+      },
+      options: {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    });
+    if (createUserResponse.status === 201 || createUserResponse.status === 409) {
+      const loginResponse = await bru.post("{{baseUrl}}/auth/login", {
+        body: {
+          email: email,
+          password: password
+        },
+        options: {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      });
+      if (loginResponse.status === 200) {
+        const loginBody = loginResponse.body;
+        bru.setVar("token", loginBody.token);
+      }
+    }
+  } catch (err) {
+    console.error("Erro no pré-script:", err);
+  }
+}
+
+tests {
+  test("deve retornar erro ao tentar criar pasta em projeto inexistente", () => {
+    expect(res.getStatus()).to.equal(404);
+    const responseBody = res.getBody();
+    expect(responseBody).to.be.an('object');
+    expect(responseBody).to.have.property('message');
+  });
+}
+

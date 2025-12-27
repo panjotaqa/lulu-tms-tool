@@ -1,0 +1,119 @@
+meta {
+  name: Desvincular usuário com sucesso
+  type: http
+  seq: 16
+}
+
+delete {
+  url: {{baseUrl}}/projects/{{projectId}}/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "userId": "42b88fa8-0f76-4a79-8ad1-a53da544bbf1"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+  testEmail: test.project.unlink@example.com
+  testPassword: senhaSegura123
+}
+
+script:pre-request {
+  const email = bru.getVar("testEmail");
+  const password = bru.getVar("testPassword");
+  try {
+    const createUserResponse = await bru.post("{{baseUrl}}/users", {
+      body: {
+        name: "Usuário Teste Unlink",
+        email: email,
+        password: password
+      },
+      options: {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    });
+    if (createUserResponse.status === 201 || createUserResponse.status === 409) {
+      const loginResponse = await bru.post("{{baseUrl}}/auth/login", {
+        body: {
+          email: email,
+          password: password
+        },
+        options: {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      });
+      if (loginResponse.status === 200) {
+        const loginBody = loginResponse.body;
+        bru.setVar("token", loginBody.token);
+        const createProjectResponse = await bru.post("{{baseUrl}}/projects", {
+          body: {
+            title: "Projeto para Desvincular",
+            slug: "projeto-para-desvincular-" + Date.now(),
+            description: "Projeto para desvincular usuário"
+          },
+          options: {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + loginBody.token
+            }
+          }
+        });
+        if (createProjectResponse.status === 201) {
+          bru.setVar("projectId", createProjectResponse.body.id);
+        }
+        const createUser2Response = await bru.post("{{baseUrl}}/users", {
+          body: {
+            name: "Usuário para Desvincular",
+            email: "user.to.unlink" + Date.now() + "@example.com",
+            password: "senhaSegura123"
+          },
+          options: {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        });
+        if (createUser2Response.status === 201) {
+          const userIdToUnlink = createUser2Response.body.id;
+          bru.setVar("userIdToUnlink", userIdToUnlink);
+          await bru.post("{{baseUrl}}/projects/" + bru.getVar("projectId") + "/users", {
+            body: {
+              userId: userIdToUnlink
+            },
+            options: {
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + loginBody.token
+              }
+            }
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Erro no pré-script:", err);
+  }
+}
+
+tests {
+  test("deve desvincular usuário do projeto com sucesso", () => {
+    expect(res.getStatus()).to.equal(200);
+    const responseBody = res.getBody();
+    expect(responseBody).to.be.an('object');
+    expect(responseBody).to.have.property('id');
+    expect(responseBody).to.have.property('users');
+    expect(responseBody.users).to.be.an('array');
+  });
+}

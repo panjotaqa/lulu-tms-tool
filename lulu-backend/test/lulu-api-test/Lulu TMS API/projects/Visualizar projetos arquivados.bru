@@ -1,0 +1,106 @@
+meta {
+  name: Visualizar projetos arquivados
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/projects/archived?page=1&limit=10
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+  testEmail: test.project.archived.list@example.com
+  testPassword: senhaSegura123
+}
+
+script:pre-request {
+  const email = bru.getVar("testEmail");
+  const password = bru.getVar("testPassword");
+  try {
+    const createUserResponse = await bru.post("{{baseUrl}}/users", {
+      body: {
+        name: "Usuário Teste Archived List",
+        email: email,
+        password: password
+      },
+      options: {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    });
+    if (createUserResponse.status === 201 || createUserResponse.status === 409) {
+      const loginResponse = await bru.post("{{baseUrl}}/auth/login", {
+        body: {
+          email: email,
+          password: password
+        },
+        options: {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      });
+      if (loginResponse.status === 200) {
+        const loginBody = loginResponse.body;
+        bru.setVar("token", loginBody.token);
+        for (let i = 0; i < 2; i++) {
+          const createResponse = await bru.post("{{baseUrl}}/projects", {
+            body: {
+              title: "Projeto Arquivado " + i + " " + Date.now(),
+              slug: "projeto-arquivado-" + i + "-" + Date.now(),
+              description: "Projeto para arquivar"
+            },
+            options: {
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + loginBody.token
+              }
+            }
+          });
+          if (createResponse.status === 201) {
+            await bru.patch("{{baseUrl}}/projects/" + createResponse.body.id + "/archive", {
+              options: {
+                headers: {
+                  "Authorization": "Bearer " + loginBody.token
+                }
+              }
+            });
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Erro no pré-script:", err);
+  }
+}
+
+tests {
+  test("deve listar projetos arquivados com paginação", () => {
+    expect(res.getStatus()).to.equal(200);
+    const responseBody = res.getBody();
+    expect(responseBody).to.be.an('object');
+    expect(responseBody).to.have.property('data');
+    expect(responseBody.data).to.be.an('array');
+    expect(responseBody).to.have.property('total');
+    expect(responseBody.total).to.be.a('number');
+    expect(responseBody).to.have.property('page');
+    expect(responseBody.page).to.equal(1);
+    expect(responseBody).to.have.property('limit');
+    expect(responseBody.limit).to.equal(10);
+    expect(responseBody).to.have.property('totalPages');
+    expect(responseBody.totalPages).to.be.a('number');
+    if (responseBody.data.length > 0) {
+      const project = responseBody.data[0];
+      expect(project).to.have.property('isArchived');
+      expect(project.isArchived).to.equal(true);
+    }
+  });
+}
+

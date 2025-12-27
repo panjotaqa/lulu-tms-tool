@@ -1,0 +1,29 @@
+meta {
+  name: Validar email faltando
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/users
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "João Silva",
+    "password": "senhaSegura123"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+}
+
+tests {
+  test("deve retornar 400 quando email está faltando", () => {
+    expect(res.getStatus()).to.equal(400);
+  });
+}
+

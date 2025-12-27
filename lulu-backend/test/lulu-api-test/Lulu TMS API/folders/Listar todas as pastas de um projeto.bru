@@ -1,0 +1,112 @@
+meta {
+  name: Listar todas as pastas de um projeto
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/folders/projects/{{projectId}}
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+  testEmail: test.folder.list@example.com
+  testPassword: senhaSegura123
+}
+
+script:pre-request {
+  const email = bru.getVar("testEmail");
+  const password = bru.getVar("testPassword");
+  try {
+    const createUserResponse = await bru.post("{{baseUrl}}/users", {
+      body: {
+        name: "Usuário Teste List",
+        email: email,
+        password: password
+      },
+      options: {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    });
+    if (createUserResponse.status === 201 || createUserResponse.status === 409) {
+      const loginResponse = await bru.post("{{baseUrl}}/auth/login", {
+        body: {
+          email: email,
+          password: password
+        },
+        options: {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      });
+      if (loginResponse.status === 200) {
+        const loginBody = loginResponse.body;
+        bru.setVar("token", loginBody.token);
+        const createProjectResponse = await bru.post("{{baseUrl}}/projects", {
+          body: {
+            title: "Projeto List " + Date.now(),
+            slug: "projeto-list-" + Date.now(),
+            description: "Projeto para testes"
+          },
+          options: {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + loginBody.token
+            }
+          }
+        });
+        if (createProjectResponse.status === 201) {
+          const projectId = createProjectResponse.body.id;
+          bru.setVar("projectId", projectId);
+          await bru.post("{{baseUrl}}/folders", {
+            body: {
+              title: "Pasta 1",
+              projectId: projectId
+            },
+            options: {
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + loginBody.token
+              }
+            }
+          });
+          await bru.post("{{baseUrl}}/folders", {
+            body: {
+              title: "Pasta 2",
+              projectId: projectId
+            },
+            options: {
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + loginBody.token
+              }
+            }
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Erro no pré-script:", err);
+  }
+}
+
+tests {
+  test("deve listar todas as pastas de um projeto com estrutura hierárquica", () => {
+    expect(res.getStatus()).to.equal(200);
+    const responseBody = res.getBody();
+    expect(responseBody).to.be.an('array');
+    expect(responseBody.length).to.be.greaterThan(0);
+    const rootFolder = responseBody.find(f => f.isRoot === true);
+    expect(rootFolder).to.not.be.undefined;
+    expect(rootFolder).to.have.property('children');
+  });
+}
+

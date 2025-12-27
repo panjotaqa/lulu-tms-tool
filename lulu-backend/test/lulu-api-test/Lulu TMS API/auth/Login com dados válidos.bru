@@ -1,0 +1,81 @@
+meta {
+  name: Login com dados válidos
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "joao.silva@example.com",
+    "password": "senhaSegura123"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+}
+
+tests {
+  test("deve realizar login com dados válidos", () => {
+    expect(res.getStatus()).to.equal(200);
+    const responseBody = res.getBody();
+    expect(responseBody).to.be.an('object');
+    expect(responseBody).to.have.property('token');
+    expect(responseBody.token).to.be.a('string');
+    expect(responseBody).to.have.property('id');
+    expect(responseBody).to.have.property('name');
+    expect(responseBody.name).to.equal('João Silva');
+    expect(responseBody).to.have.property('email');
+    expect(responseBody.email).to.equal('joao.silva@example.com');
+    
+    // Salvar token em variável de ambiente para uso em outras requisições
+    bru.setVar("token", responseBody.token);
+  });
+}
+
+example {
+  name: 200 Response
+  description: Login realizado com sucesso
+  
+  request: {
+    url: {{baseUrl}}/auth/login
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "email": "joao.silva@example.com",
+        "password": "senhaSegura123"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3OC05MGFiLWNkZWYtMTIzNC01Njc4OTBhYmNkZWYiLCJpYXQiOjE2NDA5OTIwMDAsImV4cCI6MTY0MTA3ODQwMH0.example",
+          "id": "12345678-90ab-cdef-1234-567890abcdef",
+          "name": "João Silva",
+          "email": "joao.silva@example.com"
+        }
+      '''
+    }
+  }
+}
+

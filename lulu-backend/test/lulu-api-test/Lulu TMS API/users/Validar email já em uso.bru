@@ -1,0 +1,35 @@
+meta {
+  name: Validar email já em uso
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/users
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "João Silva",
+    "email": "joao.silva@example.com",
+    "password": "senhaSegura123"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+}
+
+tests {
+  test("deve retornar 409 quando email já está em uso", () => {
+    expect(res.getStatus()).to.equal(409);
+  });
+}
+
+docs {
+  Nota: Este teste assume que o usuário com o email "joao.silva@example.com" já foi criado anteriormente. 
+  Execute primeiro o teste "Cadastrar novo usuário" antes de executar este teste.
+}
+

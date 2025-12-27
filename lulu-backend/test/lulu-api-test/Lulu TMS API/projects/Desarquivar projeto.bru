@@ -1,0 +1,94 @@
+meta {
+  name: Desarquivar projeto
+  type: http
+  seq: 12
+}
+
+patch {
+  url: {{baseUrl}}/projects/{{projectId}}/unarchive
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+  testEmail: test.project.unarchive@example.com
+  testPassword: senhaSegura123
+}
+
+script:pre-request {
+  const email = bru.getVar("testEmail");
+  const password = bru.getVar("testPassword");
+  try {
+    const createUserResponse = await bru.post("{{baseUrl}}/users", {
+      body: {
+        name: "Usuário Teste Unarchive",
+        email: email,
+        password: password
+      },
+      options: {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    });
+    if (createUserResponse.status === 201 || createUserResponse.status === 409) {
+      const loginResponse = await bru.post("{{baseUrl}}/auth/login", {
+        body: {
+          email: email,
+          password: password
+        },
+        options: {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      });
+      if (loginResponse.status === 200) {
+        const loginBody = loginResponse.body;
+        bru.setVar("token", loginBody.token);
+        const createProjectResponse = await bru.post("{{baseUrl}}/projects", {
+          body: {
+            title: "Projeto para Desarquivar",
+            slug: "projeto-para-desarquivar-" + Date.now(),
+            description: "Projeto que será desarquivado"
+          },
+          options: {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + loginBody.token
+            }
+          }
+        });
+        if (createProjectResponse.status === 201) {
+          const projectId = createProjectResponse.body.id;
+          bru.setVar("projectId", projectId);
+          await bru.patch("{{baseUrl}}/projects/" + projectId + "/archive", {
+            options: {
+              headers: {
+                "Authorization": "Bearer " + loginBody.token
+              }
+            }
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Erro no pré-script:", err);
+  }
+}
+
+tests {
+  test("deve desarquivar projeto com sucesso", () => {
+    expect(res.getStatus()).to.equal(200);
+    const responseBody = res.getBody();
+    expect(responseBody).to.be.an('object');
+    expect(responseBody).to.have.property('id');
+    expect(responseBody).to.have.property('isArchived');
+    expect(responseBody.isArchived).to.equal(false);
+  });
+}
+

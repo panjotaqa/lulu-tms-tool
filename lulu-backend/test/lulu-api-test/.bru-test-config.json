@@ -1,0 +1,109 @@
+{
+    "bru_test_config": {
+      "file_rules": {
+        "base_path": ".",
+        "allowed_paths": ["*.bru"],
+        "forbidden_actions": [
+          "create_new_files",
+          "create_new_folders",
+          "modify_paths"
+        ],
+        "edit_rules": {
+          "must_use_existing_path": true,
+          "must_use_relative_paths": true
+        }
+      },
+      "test_structure": {
+        "required_sections": [
+          "tests { ... }",
+          "docs { ... }"
+        ],
+        "test_format": "test(\"test name\", () => { ... })",
+        "common_test_categories": [
+          "request_structure",
+          "response_status",
+          "response_body",
+          "data_validation"
+        ]
+      },
+      "bru_methods": {
+        "request": {
+          "get_body": "req.getBody()",
+          "get_headers": "req.getHeaders()",
+          "get_params": "req.getParams()"
+        },
+        "response": {
+          "get_status": "res.getStatus()",
+          "get_body": "res.getBody()",
+          "get_headers": "res.getHeaders()"
+        }
+      },
+      "assertion_patterns": {
+        "property_exists": "expect(obj).to.have.property('prop')",
+        "type_check": "expect(value).to.be.a('type')",
+        "array_check": "expect(arr).to.be.an('array')",
+        "status_check": "expect(res.getStatus()).to.equal(200)",
+        "value_equals": "expect(value).to.equal(expected)",
+        "array_length": "expect(arr).to.have.lengthOf(n)",
+        "array_contains": "expect(arr).to.include(value)"
+      },
+      "common_test_patterns": {
+        "request_structure": `
+          test("Validate request structure", () => {
+            const body = req.getBody();
+            // Check top-level properties
+            expect(body).to.have.property('propName');
+            expect(body.propName).to.be.a('type');
+            
+            // Check nested structures
+            const nested = body.propName;
+            expect(nested).to.have.property('nestedProp');
+          });
+        `,
+        "response_validation": `
+          test("Validate response", () => {
+            expect(res.getStatus()).to.equal(200);
+            const responseBody = res.getBody();
+            expect(responseBody).to.be.an('object');
+          });
+        `,
+        "array_validation": `
+          test("Validate array contents", () => {
+            const items = req.getBody().items;
+            expect(items).to.be.an('array');
+            items.forEach(item => {
+              expect(item).to.have.property('requiredProp');
+            });
+          });
+        `,
+        "data_type_validation": `
+          test("Validate data types", () => {
+            const data = req.getBody().data;
+            expect(data.id).to.be.a('number');
+            expect(data.name).to.be.a('string');
+            expect(data.items).to.be.an('array');
+          });
+        `
+      },
+      "best_practices": {
+        "test_organization": [
+          "Group related tests together",
+          "Use descriptive test names",
+          "Test one concept per test",
+          "Include both positive and negative cases"
+        ],
+        "validation_priorities": [
+          "Request structure first",
+          "Response status second",
+          "Response body structure third",
+          "Data validation last"
+        ],
+        "error_handling": [
+          "Test for required fields",
+          "Validate data types",
+          "Check array contents",
+          "Verify nested structures"
+        ]
+      }
+    }
+  }

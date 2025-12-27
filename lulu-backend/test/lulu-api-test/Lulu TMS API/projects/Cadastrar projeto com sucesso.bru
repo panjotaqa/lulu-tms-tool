@@ -1,0 +1,109 @@
+meta {
+  name: Cadastrar projeto com sucesso
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/projects
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "title": "Projeto Teste {{$timestamp}}",
+    "slug": "projeto-teste-{{$timestamp}}",
+    "description": "Descrição do projeto de teste"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+  testEmail: test.project@example.com
+  testPassword: senhaSegura123
+}
+
+tests {
+  test("deve cadastrar projeto com sucesso", () => {
+    expect(res.getStatus()).to.equal(201);
+    const responseBody = res.getBody();
+    expect(responseBody).to.be.an('object');
+    expect(responseBody).to.have.property('id');
+    expect(responseBody.id).to.be.a('string');
+    expect(responseBody).to.have.property('title');
+    expect(responseBody.title).to.be.a('string');
+    expect(responseBody).to.have.property('slug');
+    expect(responseBody.slug).to.be.a('string');
+    expect(responseBody).to.have.property('description');
+    expect(responseBody).to.have.property('isArchived');
+    expect(responseBody.isArchived).to.equal(false);
+    expect(responseBody).to.have.property('createdBy');
+    expect(responseBody.createdBy).to.be.an('object');
+    expect(responseBody.createdBy).to.have.property('id');
+    expect(responseBody).to.have.property('users');
+    expect(responseBody.users).to.be.an('array');
+    expect(responseBody.users.length).to.be.greaterThan(0);
+    bru.setVar("projectId", responseBody.id);
+  });
+}
+
+example {
+  name: 201 Response
+  description: Projeto criado com sucesso
+  
+  request: {
+    url: {{baseUrl}}/projects
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "title": "Projeto de Desenvolvimento",
+        "slug": "projeto-desenvolvimento",
+        "description": "Projeto para desenvolvimento de sistema de gestão"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": "123e4567-e89b-12d3-a456-426614174000",
+          "title": "Projeto de Desenvolvimento",
+          "slug": "projeto-desenvolvimento",
+          "description": "Projeto para desenvolvimento de sistema de gestão",
+          "isArchived": false,
+          "createdBy": {
+            "id": "123e4567-e89b-12d3-a456-426614174001",
+            "name": "João Silva",
+            "email": "joao.silva@example.com"
+          },
+          "users": [
+            {
+              "id": "123e4567-e89b-12d3-a456-426614174001",
+              "name": "João Silva",
+              "email": "joao.silva@example.com"
+            }
+          ],
+          "createdAt": "2024-01-01T00:00:00.000Z",
+          "updatedAt": "2024-01-01T00:00:00.000Z"
+        }
+      '''
+    }
+  }
+}

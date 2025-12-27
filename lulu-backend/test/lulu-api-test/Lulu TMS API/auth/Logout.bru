@@ -1,0 +1,95 @@
+meta {
+  name: Logout
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/logout
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+}
+
+tests {
+  test("deve realizar logout com sucesso", () => {
+    expect(res.getStatus()).to.equal(200);
+    const responseBody = res.getBody();
+    expect(responseBody).to.be.an('object');
+    expect(responseBody).to.have.property('message');
+    expect(responseBody.message).to.equal('Logout realizado com sucesso');
+  });
+}
+
+example {
+  name: 200 Response
+  description: Logout realizado com sucesso
+  
+  request: {
+    url: {{baseUrl}}/auth/logout
+    method: POST
+    mode: none
+    headers: {
+      Authorization: Bearer {{token}}
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Logout realizado com sucesso"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: Não autorizado - Token inválido ou ausente
+  
+  request: {
+    url: {{baseUrl}}/auth/logout
+    method: POST
+    mode: none
+  }
+  
+  response: {
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "statusCode": 401,
+          "message": "Unauthorized"
+        }
+      '''
+    }
+  }
+}

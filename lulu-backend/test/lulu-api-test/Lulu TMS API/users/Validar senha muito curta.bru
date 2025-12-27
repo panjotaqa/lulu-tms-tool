@@ -1,0 +1,30 @@
+meta {
+  name: Validar senha muito curta
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/users
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "João Silva",
+    "email": "joao.silva@example.com",
+    "password": "12345"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+}
+
+tests {
+  test("deve retornar 400 quando senha é muito curta", () => {
+    expect(res.getStatus()).to.equal(400);
+  });
+}
+

@@ -1,0 +1,106 @@
+meta {
+  name: Tentar editar projeto com título existente
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/projects/{{projectId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "title": "{{existingTitle}}"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+  testEmail: test.project.edit.title@example.com
+  testPassword: senhaSegura123
+  existingTitle: Título Existente para Edição
+}
+
+script:pre-request {
+  const email = bru.getVar("testEmail");
+  const password = bru.getVar("testPassword");
+  try {
+    const createUserResponse = await bru.post("{{baseUrl}}/users", {
+      body: {
+        name: "Usuário Teste Edit Title",
+        email: email,
+        password: password
+      },
+      options: {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    });
+    if (createUserResponse.status === 201 || createUserResponse.status === 409) {
+      const loginResponse = await bru.post("{{baseUrl}}/auth/login", {
+        body: {
+          email: email,
+          password: password
+        },
+        options: {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      });
+      if (loginResponse.status === 200) {
+        const loginBody = loginResponse.body;
+        bru.setVar("token", loginBody.token);
+        const createProject1Response = await bru.post("{{baseUrl}}/projects", {
+          body: {
+            title: bru.getVar("existingTitle"),
+            slug: "titulo-existente-" + Date.now(),
+            description: "Projeto com título existente"
+          },
+          options: {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + loginBody.token
+            }
+          }
+        });
+        const createProject2Response = await bru.post("{{baseUrl}}/projects", {
+          body: {
+            title: "Projeto para Editar",
+            slug: "projeto-para-editar-" + Date.now(),
+            description: "Projeto original"
+          },
+          options: {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + loginBody.token
+            }
+          }
+        });
+        if (createProject2Response.status === 201) {
+          bru.setVar("projectId", createProject2Response.body.id);
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Erro no pré-script:", err);
+  }
+}
+
+tests {
+  test("deve retornar erro ao tentar editar projeto com título existente", () => {
+    expect(res.getStatus()).to.equal(409);
+    const responseBody = res.getBody();
+    expect(responseBody).to.be.an('object');
+    expect(responseBody).to.have.property('message');
+    expect(responseBody.message).to.include('título');
+  });
+}
+

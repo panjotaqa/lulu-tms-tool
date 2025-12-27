@@ -1,0 +1,29 @@
+meta {
+  name: Validar senha faltando
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/users
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "João Silva",
+    "email": "joao.silva@example.com"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+}
+
+tests {
+  test("deve retornar 400 quando senha está faltando", () => {
+    expect(res.getStatus()).to.equal(400);
+  });
+}
+

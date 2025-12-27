@@ -1,0 +1,110 @@
+meta {
+  name: Criar pasta filha da ROOT
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/folders
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "title": "Pasta Filha {{$randomNameSuffix}}",
+    "projectId": "{{projectId}}",
+    "parentFolderId": "{{rootFolderId}}"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+  testEmail: test.folder.child@example.com
+  testPassword: senhaSegura123
+}
+
+script:pre-request {
+  const email = bru.getVar("testEmail");
+  const password = bru.getVar("testPassword");
+  try {
+    const createUserResponse = await bru.post("{{baseUrl}}/users", {
+      body: {
+        name: "Usuário Teste Folder Child",
+        email: email,
+        password: password
+      },
+      options: {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    });
+    if (createUserResponse.status === 201 || createUserResponse.status === 409) {
+      const loginResponse = await bru.post("{{baseUrl}}/auth/login", {
+        body: {
+          email: email,
+          password: password
+        },
+        options: {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      });
+      if (loginResponse.status === 200) {
+        const loginBody = loginResponse.body;
+        bru.setVar("token", loginBody.token);
+        const createProjectResponse = await bru.post("{{baseUrl}}/projects", {
+          body: {
+            title: "Projeto Folder Child " + Date.now(),
+            slug: "projeto-folder-child-" + Date.now(),
+            description: "Projeto para testes"
+          },
+          options: {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + loginBody.token
+            }
+          }
+        });
+        if (createProjectResponse.status === 201) {
+          bru.setVar("projectId", createProjectResponse.body.id);
+          const createFirstFolderResponse = await bru.post("{{baseUrl}}/folders", {
+            body: {
+              title: "Primeira Pasta",
+              projectId: createProjectResponse.body.id
+            },
+            options: {
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + loginBody.token
+              }
+            }
+          });
+          if (createFirstFolderResponse.status === 201) {
+            bru.setVar("rootFolderId", createFirstFolderResponse.body.parentFolderId);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Erro no pré-script:", err);
+  }
+}
+
+tests {
+  test("deve criar pasta filha da ROOT com sucesso", () => {
+    expect(res.getStatus()).to.equal(201);
+    const responseBody = res.getBody();
+    expect(responseBody).to.be.an('object');
+    expect(responseBody).to.have.property('id');
+    expect(responseBody).to.have.property('parentFolderId');
+    expect(responseBody.parentFolderId).to.equal(bru.getVar("rootFolderId"));
+  });
+}
+
