@@ -1,0 +1,5 @@
+- this application use typescript
+- this application use node.js
+- this application use nest.js for modular project
+- this application use swagger UI for api documentation
+- this application use typeorm for validate dtos
