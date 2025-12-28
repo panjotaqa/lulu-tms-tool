@@ -24,9 +24,11 @@ import { CreateTestCaseDto } from './models/dto/create-testcase.dto';
 import { CreateBulkTestCasesDto } from './models/dto/create-bulk-testcases.dto';
 import { UpdateTestCaseDto } from './models/dto/update-testcase.dto';
 import { QueryTestCaseDto } from './models/dto/query-testcase.dto';
+import { MoveTestCasesDto } from './models/dto/move-testcases.dto';
 import {
   BulkCreateTestCaseResponse,
   PaginatedTestCaseResponse,
+  TestCaseListItemResponse,
   TestCaseResponse,
 } from './models/types/testcase-response.type';
 import { TestCaseService } from './testcase.service';
@@ -166,6 +168,81 @@ export class TestCaseController {
     return this.testCaseService.createBulk(createBulkDto, userId);
   }
 
+  @Patch('move')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Mover um ou mais casos de teste para outra pasta' })
+  @ApiResponse({
+    status: 200,
+    description: 'Casos de teste movidos com sucesso',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        example: {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          testcaseId: 'LULU-01',
+          title: 'Validar login com credenciais corretas',
+          testSuiteId: '123e4567-e89b-12d3-a456-426614174001',
+          testSuite: {
+            id: '123e4567-e89b-12d3-a456-426614174001',
+            title: 'Pasta de Testes',
+          },
+          severity: 'Major',
+          status: 'Active',
+          priority: 'High',
+          type: 'Functional',
+          isFlaky: false,
+          milestone: 'v1.0',
+          userStoryLink: 'https://jira.example.com/STORY-123',
+          layer: 'E2E',
+          environment: 'Integration',
+          automationStatus: 'Manual',
+          toBeAutomated: false,
+          description: 'Este teste valida o fluxo de login...',
+          preConditions: '1. Usuário deve estar cadastrado',
+          steps: [
+            'Given I am on the login page',
+            'When I enter valid credentials',
+            'Then I should be logged in',
+          ],
+          tags: [
+            {
+              id: '123e4567-e89b-12d3-a456-426614174002',
+              name: 'UI',
+              createdAt: '2024-01-01T00:00:00.000Z',
+              updatedAt: '2024-01-01T00:00:00.000Z',
+            },
+          ],
+          createdBy: {
+            id: '123e4567-e89b-12d3-a456-426614174003',
+            name: 'João Silva',
+            email: 'joao.silva@example.com',
+          },
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos ou validação falhou',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Caso de teste ou pasta não encontrada',
+  })
+  async moveTestCases(
+    @Body() moveDto: MoveTestCasesDto,
+    @CurrentUser('id') userId: string,
+  ): Promise<TestCaseResponse[]> {
+    return this.testCaseService.moveTestCases(
+      moveDto.testCaseIds,
+      moveDto.targetFolderId,
+      userId,
+    );
+  }
+
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Editar caso de teste' })
@@ -300,6 +377,40 @@ export class TestCaseController {
   })
   async findOne(@Param('id') id: string): Promise<TestCaseResponse> {
     return this.testCaseService.findOne(id);
+  }
+
+  @Get('project/:projectId/list')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Listar casos de teste de um projeto (otimizado para seleção)' })
+  @ApiParam({
+    name: 'projectId',
+    type: String,
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de casos de teste retornada com sucesso',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          testcaseId: { type: 'string' },
+          title: { type: 'string' },
+          testSuiteId: { type: 'string' },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Projeto não encontrado',
+  })
+  async findByProjectForSelection(
+    @Param('projectId') projectId: string,
+  ): Promise<TestCaseListItemResponse[]> {
+    return this.testCaseService.findByProjectForSelection(projectId);
   }
 
   @Get('folder/:folderId')

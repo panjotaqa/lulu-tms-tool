@@ -58,5 +58,20 @@ export class TagService {
       where: ids.map((id) => ({ id })),
     });
   }
+
+  async findAll(search?: string): Promise<Tag[]> {
+    const queryBuilder = this.tagRepository
+      .createQueryBuilder('tag')
+      .orderBy('tag.name', 'ASC')
+      .limit(50);
+
+    if (search && search.trim()) {
+      queryBuilder.where('tag.name ILIKE :search', {
+        search: `%${search.trim()}%`,
+      });
+    }
+
+    return queryBuilder.getMany();
+  }
 }
 

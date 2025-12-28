@@ -424,6 +424,56 @@ export class FolderService {
     return buildTree(null);
   }
 
+  async getFolderHierarchy(folderId: string): Promise<FolderResponse[]> {
+    this.debugLogger.debug('FolderService', 'Buscando hierarquia de pasta', {
+      folderId,
+    });
+
+    const folder = await this.folderRepository.findOne({
+      where: { id: folderId },
+      select: ['id', 'title', 'parentFolderId'],
+    });
+
+    if (!folder) {
+      throw new NotFoundException('Pasta não encontrada');
+    }
+
+    const hierarchy: FolderResponse[] = [];
+    let currentFolderId: string | null = folderId;
+
+    // Construir hierarquia do root até a pasta atual
+    while (currentFolderId) {
+      const currentFolder = await this.folderRepository.findOne({
+        where: { id: currentFolderId },
+        relations: ['createdBy'],
+        select: {
+          id: true,
+          title: true,
+          position: true,
+          projectId: true,
+          parentFolderId: true,
+          createdById: true,
+          createdAt: true,
+          updatedAt: true,
+          createdBy: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      });
+
+      if (!currentFolder) {
+        break;
+      }
+
+      hierarchy.unshift(this.mapToResponse(currentFolder));
+      currentFolderId = currentFolder.parentFolderId;
+    }
+
+    return hierarchy;
+  }
+
 
   /**
    * Verifica se uma pasta é descendente de outra usando recursive query

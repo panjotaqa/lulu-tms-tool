@@ -26,6 +26,7 @@ import { TestType } from './models/enums/test-type.enum';
 import {
   BulkCreateTestCaseResponse,
   PaginatedTestCaseResponse,
+  TestCaseListItemResponse,
   TestCaseResponse,
 } from './models/types/testcase-response.type';
 
@@ -483,6 +484,120 @@ export class TestCaseService {
     return this.mapToResponse(testCase);
   }
 
+  async moveTestCases(
+    testCaseIds: string[],
+    targetFolderId: string,
+    userId: string,
+  ): Promise<TestCaseResponse[]> {
+    if (testCaseIds.length === 0) {
+      throw new BadRequestException('É necessário selecionar pelo menos um caso de teste');
+    }
+
+    // Validar que todos os casos de teste existem
+    const testCases = await this.testCaseRepository
+      .createQueryBuilder('testCase')
+      .leftJoinAndSelect('testCase.testSuite', 'testSuite')
+      .leftJoinAndSelect('testSuite.project', 'project')
+      .whereInIds(testCaseIds)
+      .getMany();
+
+    if (testCases.length !== testCaseIds.length) {
+      throw new NotFoundException('Um ou mais casos de teste não foram encontrados');
+    }
+
+    // Validar que a pasta destino existe
+    const targetFolder = await this.folderRepository.findOne({
+      where: { id: targetFolderId },
+      relations: ['project'],
+    });
+
+    if (!targetFolder) {
+      throw new NotFoundException('Pasta destino não encontrada');
+    }
+
+    // Validar que todos os casos de teste pertencem ao mesmo projeto
+    const sourceProjectId = testCases[0].testSuite.projectId;
+    const targetProjectId = targetFolder.projectId;
+
+    if (sourceProjectId !== targetProjectId) {
+      throw new BadRequestException(
+        'Não é possível mover casos de teste para uma pasta de outro projeto',
+      );
+    }
+
+    // Validar que não está tentando mover para a mesma pasta
+    const allInSameFolder = testCases.every(
+      (testCase) => testCase.testSuiteId === targetFolderId,
+    );
+    if (allInSameFolder) {
+      throw new BadRequestException(
+        'Os casos de teste selecionados já estão na pasta destino',
+      );
+    }
+
+    // Usar transação para garantir atomicidade
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Atualizar testSuiteId de todos os casos de teste
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(TestCase)
+        .set({ testSuiteId: targetFolderId })
+        .whereInIds(testCaseIds)
+        .execute();
+
+      await queryRunner.commitTransaction();
+
+      // Buscar casos de teste atualizados
+      const updatedTestCases = await this.testCaseRepository.find({
+        where: testCaseIds.map((id) => ({ id })),
+        relations: ['testSuite', 'createdBy', 'testCaseTags', 'testCaseTags.tag'],
+        select: {
+          id: true,
+          testcaseId: true,
+          title: true,
+          testSuiteId: true,
+          severity: true,
+          status: true,
+          priority: true,
+          type: true,
+          isFlaky: true,
+          milestone: true,
+          userStoryLink: true,
+          layer: true,
+          environment: true,
+          automationStatus: true,
+          toBeAutomated: true,
+          description: true,
+          preConditions: true,
+          steps: true,
+          createdById: true,
+          createdAt: true,
+          updatedAt: true,
+          testSuite: {
+            id: true,
+            title: true,
+          },
+          createdBy: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      });
+
+      return updatedTestCases.map((testCase) => this.mapToResponse(testCase));
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   async findByFolder(
     folderId: string,
     queryDto: QueryTestCaseDto,
@@ -509,6 +624,37 @@ export class TestCaseService {
       limit,
       totalPages: Math.ceil(total / limit),
     };
+  }
+
+  async findByProjectForSelection(
+    projectId: string,
+  ): Promise<TestCaseListItemResponse[]> {
+    this.debugLogger.debug(
+      'TestCaseService',
+      'Buscando casos de teste para seleção',
+      { projectId },
+    );
+
+    const testCases = await this.testCaseRepository
+      .createQueryBuilder('testCase')
+      .leftJoin('testCase.testSuite', 'testSuite')
+      .leftJoin('testSuite.project', 'project')
+      .select([
+        'testCase.id',
+        'testCase.testcaseId',
+        'testCase.title',
+        'testCase.testSuiteId',
+      ])
+      .where('project.id = :projectId', { projectId })
+      .orderBy('testCase.createdAt', 'DESC')
+      .getMany();
+
+    return testCases.map((testCase) => ({
+      id: testCase.id,
+      testcaseId: testCase.testcaseId,
+      title: testCase.title,
+      testSuiteId: testCase.testSuiteId,
+    }));
   }
 
   private mapToResponse(testCase: TestCase): TestCaseResponse {

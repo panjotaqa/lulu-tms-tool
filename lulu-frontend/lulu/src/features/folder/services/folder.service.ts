@@ -46,5 +46,9 @@ export class FolderService {
   static async findByProject(projectId: string): Promise<FolderTreeResponse> {
     return apiRequest<FolderTreeResponse>(`/folders/projects/${projectId}`)
   }
+
+  static async getHierarchy(folderId: string): Promise<FolderResponse[]> {
+    return apiRequest<FolderResponse[]>(`/folders/${folderId}/hierarchy`)
+  }
 }
 

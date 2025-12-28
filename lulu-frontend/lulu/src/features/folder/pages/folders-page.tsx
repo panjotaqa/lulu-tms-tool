@@ -10,6 +10,7 @@ import { CreateFolderDialog } from '../components/create-folder-dialog'
 import { CreateTestCasePanel } from '@/features/testcase/components/create-testcase-panel'
 import { EditTestCasePanel } from '@/features/testcase/components/edit-testcase-panel'
 import { BulkCreateTestCaseDialog } from '@/features/testcase/components/bulk-create-testcase-dialog'
+import { MoveTestCasesDialog } from '@/features/testcase/components/move-testcases-dialog'
 import {
   findNodeById,
   isDescendant,
@@ -55,6 +56,7 @@ export function FoldersPage() {
   } | null>(null)
   const [isTestCasePanelOpen, setIsTestCasePanelOpen] = useState(false)
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false)
+  const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false)
   const [editingTestCaseId, setEditingTestCaseId] = useState<string | null>(
     null
   )
@@ -66,10 +68,14 @@ export function FoldersPage() {
     totalPages,
     total,
     pageSize,
+    selectedTestCaseIds,
     loadTestCases,
     createBulkTestCases,
     refreshTestCases,
     setPageSize,
+    toggleTestCaseSelection,
+    selectAllTestCases,
+    moveTestCases,
   } = useTestCases({
     folderId: selectedNode?.id || null,
     pageSize: 10,
@@ -255,6 +261,19 @@ export function FoldersPage() {
     refreshTestCases()
   }
 
+  const handleMoveTestCases = () => {
+    setIsMoveDialogOpen(true)
+  }
+
+  const handleConfirmMove = async (targetFolderId: string) => {
+    try {
+      await moveTestCases(targetFolderId)
+      setIsMoveDialogOpen(false)
+    } catch (error) {
+      // Erro já tratado no hook com toast
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -344,6 +363,7 @@ export function FoldersPage() {
           onCreateTestCase={() => setIsTestCasePanelOpen(true)}
           onCreateBulkTestCases={() => setIsBulkDialogOpen(true)}
           onEditTestCase={handleEditTestCase}
+          onMoveTestCases={handleMoveTestCases}
           testCases={testCases}
           isLoadingTestCases={isLoadingTestCases}
           currentPage={currentPage}
@@ -352,6 +372,9 @@ export function FoldersPage() {
           pageSize={pageSize}
           onPageChange={loadTestCases}
           onPageSizeChange={setPageSize}
+          selectedTestCaseIds={selectedTestCaseIds}
+          onSelectionChange={toggleTestCaseSelection}
+          onSelectAll={selectAllTestCases}
         />
 
         <CreateFolderDialog
@@ -394,6 +417,15 @@ export function FoldersPage() {
                 onUpdateSuccess={handleTestCaseUpdated}
               />
             )}
+            <MoveTestCasesDialog
+              isOpen={isMoveDialogOpen}
+              onClose={() => setIsMoveDialogOpen(false)}
+              onConfirm={handleConfirmMove}
+              rootNodes={rootNodesFromHook}
+              currentFolderId={selectedNode?.id || null}
+              selectedCount={selectedTestCaseIds.size}
+              isLoading={isLoadingTestCases}
+            />
           </>
         )}
       </div>

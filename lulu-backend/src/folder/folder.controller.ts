@@ -247,5 +247,67 @@ export class FolderController {
   ): Promise<FolderTreeResponse> {
     return this.folderService.findByProject(projectId);
   }
+
+  @Get(':id/hierarchy')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Buscar hierarquia de uma pasta (breadcrumb)' })
+  @ApiParam({ name: 'id', type: String, example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiResponse({
+    status: 200,
+    description: 'Hierarquia de pastas retornada com sucesso',
+    schema: {
+      example: [
+        {
+          id: '123e4567-e89b-12d3-a456-426614174002',
+          title: 'ROOT',
+          order: 0,
+          projectId: '123e4567-e89b-12d3-a456-426614174001',
+          parentFolderId: null,
+          createdBy: {
+            id: '123e4567-e89b-12d3-a456-426614174003',
+            name: 'João Silva',
+            email: 'joao.silva@example.com',
+          },
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+        {
+          id: '123e4567-e89b-12d3-a456-426614174004',
+          title: 'Pasta Pai',
+          order: 1,
+          projectId: '123e4567-e89b-12d3-a456-426614174001',
+          parentFolderId: '123e4567-e89b-12d3-a456-426614174002',
+          createdBy: {
+            id: '123e4567-e89b-12d3-a456-426614174003',
+            name: 'João Silva',
+            email: 'joao.silva@example.com',
+          },
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+        {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          title: 'Pasta Atual',
+          order: 2,
+          projectId: '123e4567-e89b-12d3-a456-426614174001',
+          parentFolderId: '123e4567-e89b-12d3-a456-426614174004',
+          createdBy: {
+            id: '123e4567-e89b-12d3-a456-426614174003',
+            name: 'João Silva',
+            email: 'joao.silva@example.com',
+          },
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Pasta não encontrada',
+  })
+  async getHierarchy(@Param('id') id: string): Promise<FolderResponse[]> {
+    return this.folderService.getFolderHierarchy(id);
+  }
 }
 

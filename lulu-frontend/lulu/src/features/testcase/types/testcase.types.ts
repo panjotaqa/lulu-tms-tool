@@ -50,6 +50,18 @@ export interface TagResponse {
   updatedAt: string
 }
 
+export interface Tag {
+  id: string
+  name: string
+}
+
+export interface TestCaseListItem {
+  id: string
+  testcaseId: string
+  title: string
+  testSuiteId: string
+}
+
 export interface TestCaseResponse {
   id: string
   testcaseId: string
@@ -121,5 +133,10 @@ export interface UpdateTestCaseRequest {
   preConditions?: string
   steps?: string[]
   tags?: string[]
+}
+
+export interface MoveTestCasesRequest {
+  testCaseIds: string[]
+  targetFolderId: string
 }
 

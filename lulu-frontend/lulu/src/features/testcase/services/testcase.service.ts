@@ -1,8 +1,10 @@
 import { apiRequest } from '@/lib/api'
 import type {
+  TestCaseListItem,
   TestCaseResponse,
   CreateTestCaseRequest,
   UpdateTestCaseRequest,
+  MoveTestCasesRequest,
 } from '../types/testcase.types'
 
 export interface PaginatedTestCaseResponse {
@@ -44,6 +46,14 @@ export class TestCaseService {
     return apiRequest<TestCaseResponse>(`/testcases/${id}`)
   }
 
+  static async findByProjectForSelection(
+    projectId: string
+  ): Promise<TestCaseListItem[]> {
+    return apiRequest<TestCaseListItem[]>(
+      `/testcases/project/${projectId}/list`
+    )
+  }
+
   static async findByFolder(
     folderId: string,
     params: QueryTestCasesParams = {}
@@ -75,6 +85,20 @@ export class TestCaseService {
     data: UpdateTestCaseRequest
   ): Promise<TestCaseResponse> {
     return apiRequest<TestCaseResponse>(`/testcases/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  }
+
+  static async moveTestCases(
+    testCaseIds: string[],
+    targetFolderId: string
+  ): Promise<TestCaseResponse[]> {
+    const data: MoveTestCasesRequest = {
+      testCaseIds,
+      targetFolderId,
+    }
+    return apiRequest<TestCaseResponse[]>('/testcases/move', {
       method: 'PATCH',
       body: JSON.stringify(data),
     })

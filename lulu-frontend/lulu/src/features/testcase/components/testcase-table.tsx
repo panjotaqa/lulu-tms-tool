@@ -7,7 +7,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Checkbox } from '@/components/ui/checkbox'
 import { TestCasePagination } from './testcase-pagination'
+import { cn } from '@/lib/utils'
 import type { TestCaseResponse } from '../types/testcase.types'
 
 interface TestCaseTableProps {
@@ -17,9 +19,12 @@ interface TestCaseTableProps {
   totalPages?: number
   total?: number
   pageSize?: number
+  selectedIds?: Set<string>
   onPageChange?: (page: number) => void
   onPageSizeChange?: (pageSize: number) => void
   onEdit?: (testCase: TestCaseResponse) => void
+  onSelectionChange?: (id: string, selected: boolean) => void
+  onSelectAll?: (selected: boolean) => void
 }
 
 export function TestCaseTable({
@@ -29,10 +34,31 @@ export function TestCaseTable({
   totalPages = 1,
   total = 0,
   pageSize = 10,
+  selectedIds = new Set(),
   onPageChange,
   onPageSizeChange,
   onEdit,
+  onSelectionChange,
+  onSelectAll,
 }: TestCaseTableProps) {
+  const allSelected = testCases.length > 0 && testCases.every((tc) => selectedIds.has(tc.id))
+  const someSelected = testCases.some((tc) => selectedIds.has(tc.id)) && !allSelected
+
+  const handleRowClick = (testCase: TestCaseResponse, e: React.MouseEvent) => {
+    // Não abrir edição se o clique foi no checkbox
+    if ((e.target as HTMLElement).closest('input[type="checkbox"]')) {
+      return
+    }
+    onEdit?.(testCase)
+  }
+
+  const handleCheckboxChange = (testCaseId: string, checked: boolean) => {
+    onSelectionChange?.(testCaseId, checked)
+  }
+
+  const handleSelectAllChange = (checked: boolean) => {
+    onSelectAll?.(checked)
+  }
 
   if (isLoading) {
     return (
@@ -62,6 +88,20 @@ export function TestCaseTable({
     <Table className="w-full">
       <TableHeader>
         <TableRow>
+          {onSelectionChange && (
+            <TableHead style={{ width: '50px' }}>
+              <Checkbox
+                checked={allSelected}
+                ref={(el) => {
+                  if (el) {
+                    el.indeterminate = someSelected
+                  }
+                }}
+                onChange={(e) => handleSelectAllChange(e.target.checked)}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </TableHead>
+          )}
           <TableHead>ID</TableHead>
           <TableHead style={{ maxWidth: '300px' }}>Título</TableHead>
           <TableHead>Status</TableHead>
@@ -76,9 +116,21 @@ export function TestCaseTable({
         {testCases.map((testCase) => (
           <TableRow
             key={testCase.id}
-            onClick={() => onEdit?.(testCase)}
-            className={onEdit ? 'cursor-pointer' : ''}
+            onClick={(e) => handleRowClick(testCase, e)}
+            className={cn(
+              onEdit ? 'cursor-pointer' : '',
+              selectedIds.has(testCase.id) ? 'bg-muted/50' : ''
+            )}
           >
+            {onSelectionChange && (
+              <TableCell onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={selectedIds.has(testCase.id)}
+                  onChange={(e) => handleCheckboxChange(testCase.id, e.target.checked)}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </TableCell>
+            )}
             <TableCell className="font-mono text-sm font-medium">
               <div className="break-words">
                 {testCase.testcaseId}

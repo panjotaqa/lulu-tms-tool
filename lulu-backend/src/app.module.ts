@@ -8,6 +8,7 @@ import { FolderModule } from './folder/folder.module';
 import { ProjectModule } from './project/project.module';
 import { TagModule } from './tag/tag.module';
 import { TestCaseModule } from './testcase/testcase.module';
+import { TestRunModule } from './testrun/testrun.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -22,6 +23,7 @@ import { UserModule } from './user/user.module';
     FolderModule,
     TagModule,
     TestCaseModule,
+    TestRunModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { TagAutocomplete } from './tag-autocomplete'
 import type {
   CreateTestCaseRequest,
   UpdateTestCaseRequest,
@@ -64,7 +65,6 @@ export function TestCaseForm({
   const [preConditions, setPreConditions] = useState('')
   const [steps, setSteps] = useState<string[]>([''])
   const [tags, setTags] = useState<string[]>([])
-  const [tagInput, setTagInput] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Pré-preencher campos quando testCase for fornecido
@@ -107,24 +107,6 @@ export function TestCaseForm({
     setSteps(newSteps)
   }
 
-  const handleAddTag = () => {
-    const trimmedTag = tagInput.trim()
-    if (trimmedTag && !tags.includes(trimmedTag)) {
-      setTags([...tags, trimmedTag])
-      setTagInput('')
-    }
-  }
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove))
-  }
-
-  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleAddTag()
-    }
-  }
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}
@@ -462,37 +444,11 @@ export function TestCaseForm({
         {/* Tags */}
         <div className="space-y-2">
           <Label htmlFor="tags">Tags</Label>
-          <div className="flex gap-2">
-            <Input
-              id="tags"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleTagInputKeyDown}
-              placeholder="Digite uma tag e pressione Enter"
-            />
-            <Button type="button" variant="outline" onClick={handleAddTag}>
-              Adicionar
-            </Button>
-          </div>
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded text-sm"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="hover:text-destructive"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
+          <TagAutocomplete
+            value={tags}
+            onChange={setTags}
+            placeholder="Buscar ou criar tags..."
+          />
         </div>
       </div>
 

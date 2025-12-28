@@ -13,6 +13,13 @@ export type TagResponse = {
   updatedAt: Date;
 };
 
+export type TestCaseListItemResponse = {
+  id: string;
+  testcaseId: string;
+  title: string;
+  testSuiteId: string;
+};
+
 export type TestCaseResponse = {
   id: string;
   testcaseId: string;

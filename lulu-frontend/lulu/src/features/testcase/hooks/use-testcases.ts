@@ -5,6 +5,7 @@ import type {
   CreateTestCaseRequest,
 } from '../types/testcase.types'
 import { handleApiError } from '@/features/auth/services/auth.service'
+import { useToast } from '@/hooks/use-toast'
 
 interface UseTestCasesOptions {
   folderId: string | null
@@ -22,6 +23,10 @@ export function useTestCases({
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
   const [pageSize, setPageSize] = useState(initialPageSize)
+  const [selectedTestCaseIds, setSelectedTestCaseIds] = useState<Set<string>>(
+    new Set()
+  )
+  const { toast } = useToast()
 
   const loadTestCases = useCallback(
     async (page: number = 1) => {
@@ -117,6 +122,71 @@ export function useTestCases({
     []
   )
 
+  const toggleTestCaseSelection = useCallback((id: string) => {
+    setSelectedTestCaseIds((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(id)) {
+        newSet.delete(id)
+      } else {
+        newSet.add(id)
+      }
+      return newSet
+    })
+  }, [])
+
+  const selectAllTestCases = useCallback((selected: boolean) => {
+    if (selected) {
+      const allIds = new Set(testCases.map((tc) => tc.id))
+      setSelectedTestCaseIds(allIds)
+    } else {
+      setSelectedTestCaseIds(new Set())
+    }
+  }, [testCases])
+
+  const clearSelection = useCallback(() => {
+    setSelectedTestCaseIds(new Set())
+  }, [])
+
+  const moveTestCases = useCallback(
+    async (targetFolderId: string): Promise<void> => {
+      if (selectedTestCaseIds.size === 0) {
+        throw new Error('Nenhum caso de teste selecionado')
+      }
+
+      if (!folderId) {
+        throw new Error('Folder ID é obrigatório')
+      }
+
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        await TestCaseService.moveTestCases(
+          Array.from(selectedTestCaseIds),
+          targetFolderId
+        )
+        clearSelection()
+        await loadTestCases(currentPage)
+        toast({
+          title: 'Sucesso',
+          description: `${selectedTestCaseIds.size} caso(s) de teste movido(s) com sucesso`,
+        })
+      } catch (err) {
+        const errorMessage = handleApiError(err)
+        setError(errorMessage)
+        toast({
+          title: 'Erro',
+          description: errorMessage,
+          variant: 'destructive',
+        })
+        throw err
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [selectedTestCaseIds, folderId, clearSelection, loadTestCases, currentPage, toast]
+  )
+
   useEffect(() => {
     loadTestCases(1)
   }, [loadTestCases])
@@ -129,11 +199,16 @@ export function useTestCases({
     totalPages,
     total,
     pageSize,
+    selectedTestCaseIds,
     loadTestCases,
     createTestCase,
     createBulkTestCases,
     refreshTestCases,
     setPageSize: handlePageSizeChange,
+    toggleTestCaseSelection,
+    selectAllTestCases,
+    clearSelection,
+    moveTestCases,
   }
 }
 

@@ -1,4 +1,4 @@
-import { FolderOpen, Plus, FileStack } from 'lucide-react'
+import { FolderOpen, Plus, FileStack, Move } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FolderBreadcrumbs } from './folder-breadcrumbs'
 import { TestCaseTable } from '@/features/testcase/components/testcase-table'
@@ -12,6 +12,7 @@ interface FolderContentAreaProps {
   onCreateTestCase?: () => void
   onCreateBulkTestCases?: () => void
   onEditTestCase?: (testCase: any) => void
+  onMoveTestCases?: () => void
   testCases?: any[]
   isLoadingTestCases?: boolean
   currentPage?: number
@@ -20,6 +21,9 @@ interface FolderContentAreaProps {
   pageSize?: number
   onPageChange?: (page: number) => void
   onPageSizeChange?: (pageSize: number) => void
+  selectedTestCaseIds?: Set<string>
+  onSelectionChange?: (id: string, selected: boolean) => void
+  onSelectAll?: (selected: boolean) => void
 }
 
 export function FolderContentArea({
@@ -30,6 +34,7 @@ export function FolderContentArea({
   onCreateTestCase,
   onCreateBulkTestCases,
   onEditTestCase,
+  onMoveTestCases,
   testCases = [],
   isLoadingTestCases = false,
   currentPage = 1,
@@ -38,8 +43,12 @@ export function FolderContentArea({
   pageSize = 10,
   onPageChange,
   onPageSizeChange,
+  selectedTestCaseIds = new Set(),
+  onSelectionChange,
+  onSelectAll,
 }: FolderContentAreaProps) {
   const hasTestCases = total > 0 || isLoadingTestCases
+  const hasSelection = selectedTestCaseIds.size > 0
 
   return (
     <div className="flex-1 flex flex-col bg-background overflow-hidden">
@@ -47,22 +56,30 @@ export function FolderContentArea({
         <FolderBreadcrumbs items={breadcrumbs} onNavigate={onNavigate} />
         <div className="mt-4 flex items-center justify-between">
           <h2 className="text-2xl font-bold">{folderName}</h2>
-          {(onCreateTestCase || onCreateBulkTestCases) && (
-            <div className="flex gap-2">
-              {onCreateTestCase && (
-                <Button onClick={onCreateTestCase}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Novo Caso de Teste
-                </Button>
-              )}
-              {onCreateBulkTestCases && (
-                <Button variant="outline" onClick={onCreateBulkTestCases}>
-                  <FileStack className="w-4 h-4 mr-2" />
-                  + em Massa
-                </Button>
-              )}
-            </div>
-          )}
+          <div className="flex gap-2">
+            {onCreateTestCase && (
+              <Button onClick={onCreateTestCase}>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Caso de Teste
+              </Button>
+            )}
+            {onCreateBulkTestCases && (
+              <Button variant="outline" onClick={onCreateBulkTestCases}>
+                <FileStack className="w-4 h-4 mr-2" />
+                + em Massa
+              </Button>
+            )}
+            {onMoveTestCases && (
+              <Button
+                variant="outline"
+                onClick={onMoveTestCases}
+                disabled={!hasSelection}
+              >
+                <Move className="w-4 h-4 mr-2" />
+                Mover ({selectedTestCaseIds.size})
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -78,6 +95,9 @@ export function FolderContentArea({
             onPageChange={onPageChange}
             onPageSizeChange={onPageSizeChange}
             onEdit={onEditTestCase}
+            selectedIds={selectedTestCaseIds}
+            onSelectionChange={onSelectionChange}
+            onSelectAll={onSelectAll}
           />
         ) : (
           <div className="flex items-center justify-center h-full">
