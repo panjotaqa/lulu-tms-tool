@@ -27,6 +27,12 @@ export class TestRun {
   @Column({ type: 'varchar', length: 255, nullable: true })
   milestone: string | null;
 
+  @Column({ type: 'date' })
+  startDate: Date;
+
+  @Column({ type: 'date' })
+  endDate: Date;
+
   @Column({
     type: 'enum',
     enum: TestRunStatus,

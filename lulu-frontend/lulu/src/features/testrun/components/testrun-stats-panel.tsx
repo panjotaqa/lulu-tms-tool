@@ -10,18 +10,9 @@ interface TestRunStatsPanelProps {
 export function TestRunStatsPanel({ testRunCases }: TestRunStatsPanelProps) {
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Status de Execução</h3>
-        <StatusChart testRunCases={testRunCases} />
-      </div>
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Manual vs Automatizado</h3>
-        <AutomationChart testRunCases={testRunCases} />
-      </div>
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Testes por Camada</h3>
-        <LayerChart testRunCases={testRunCases} />
-      </div>
+      <StatusChart testRunCases={testRunCases} />
+      <AutomationChart testRunCases={testRunCases} />
+      <LayerChart testRunCases={testRunCases} />
     </div>
   )
 }

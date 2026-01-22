@@ -37,11 +37,13 @@ const statusConfig = {
 interface ExecutionTableProps {
   testCases: TestRunCase[]
   onStatusChange: (testRunCaseId: string, newStatus: TestRunCaseStatus) => void
+  onTestCaseClick?: (testCase: TestRunCase) => void
 }
 
 export function ExecutionTable({
   testCases,
   onStatusChange,
+  onTestCaseClick,
 }: ExecutionTableProps) {
   if (testCases.length === 0) {
     return (
@@ -66,7 +68,11 @@ export function ExecutionTable({
           const snapshot = testCase.testCaseSnapshot
           const config = statusConfig[testCase.status]
           return (
-            <TableRow key={testCase.id}>
+            <TableRow
+              key={testCase.id}
+              className={onTestCaseClick ? 'cursor-pointer' : ''}
+              onClick={() => onTestCaseClick?.(testCase)}
+            >
               <TableCell className="font-medium">
                 {snapshot.testcaseId}
               </TableCell>
@@ -82,7 +88,10 @@ export function ExecutionTable({
                   {config.label}
                 </Badge>
               </TableCell>
-              <TableCell className="text-center">
+              <TableCell
+                className="text-center"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <StatusActions
                   currentStatus={testCase.status}
                   onStatusChange={(newStatus) =>

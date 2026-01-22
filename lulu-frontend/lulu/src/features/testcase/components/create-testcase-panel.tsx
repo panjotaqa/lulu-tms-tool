@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ResizablePanel } from '@/components/ui/resizable-panel'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { TestCaseForm } from './testcase-form'
 import { useToast } from '@/hooks/use-toast'
 import type { CreateTestCaseRequest } from '../types/testcase.types'
@@ -52,12 +53,16 @@ export function CreateTestCasePanel({
       maxWidth="80%"
       title="Novo Caso de Teste"
     >
-      <TestCaseForm
-        folderId={folderId}
-        onSubmit={handleSubmit}
-        onCancel={onClose}
-        isLoading={isLoading}
-      />
+      <ScrollArea className="h-full">
+        <div className="pr-4 pb-2">
+          <TestCaseForm
+            folderId={folderId}
+            onSubmit={handleSubmit}
+            onCancel={onClose}
+            isLoading={isLoading}
+          />
+        </div>
+      </ScrollArea>
     </ResizablePanel>
   )
 }

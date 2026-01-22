@@ -34,6 +34,8 @@ export interface TestRunListItem {
   status: TestRunStatus
   author: TestRunAuthor
   testRunStats: TestRunStats
+  startDate: string
+  endDate: string
   createdAt: string
   updatedAt: string
 }
@@ -50,6 +52,8 @@ export interface CreateTestRunRequest {
   title: string
   description: string
   milestone?: string
+  startDate: string
+  endDate: string
   projectId: string
   defaultAssigneeId?: string
   testCaseIds: string[]
@@ -102,6 +106,7 @@ export interface TestRunCase {
   status: TestRunCaseStatus
   testCaseSnapshot: TestCaseSnapshot
   snapshotCreatedAt: string
+  evidence: string | null
   createdAt: string
   updatedAt: string
 }
@@ -112,6 +117,8 @@ export interface TestRun {
   description: string
   milestone: string | null
   status: TestRunStatus
+  startDate: string
+  endDate: string
   defaultAssigneeId: string | null
   defaultAssignee: TestRunAuthor | null
   projectId: string

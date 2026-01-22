@@ -20,6 +20,8 @@ export type TestRunListItemResponse = {
     email: string;
   };
   testRunStats: TestRunStats;
+  startDate: Date;
+  endDate: Date;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -45,6 +47,7 @@ export type TestRunCaseResponse = {
   status: TestRunCaseStatus;
   testCaseSnapshot: object;
   snapshotCreatedAt: Date;
+  evidence: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -55,6 +58,8 @@ export type TestRunResponse = {
   description: string;
   milestone: string | null;
   status: TestRunStatus;
+  startDate: Date;
+  endDate: Date;
   defaultAssigneeId: string | null;
   defaultAssignee: {
     id: string;

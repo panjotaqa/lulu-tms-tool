@@ -40,6 +40,8 @@ export function CreateTestRunDialog({
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [milestone, setMilestone] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [projectId, setProjectId] = useState('')
   const [defaultAssigneeId, setDefaultAssigneeId] = useState('')
   const [projects, setProjects] = useState<ProjectResponse[]>([])
@@ -56,6 +58,8 @@ export function CreateTestRunDialog({
       setTitle('')
       setDescription('')
       setMilestone('')
+      setStartDate('')
+      setEndDate('')
       setProjectId('')
       setDefaultAssigneeId('')
       setSelectedTestCaseIds([])
@@ -91,6 +95,18 @@ export function CreateTestRunDialog({
       newErrors.projectId = 'Projeto é obrigatório'
     }
 
+    if (!startDate) {
+      newErrors.startDate = 'Data de início é obrigatória'
+    }
+
+    if (!endDate) {
+      newErrors.endDate = 'Data de término é obrigatória'
+    }
+
+    if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+      newErrors.endDate = 'Data de término deve ser posterior ou igual à data de início'
+    }
+
     if (selectedTestCaseIds.length === 0) {
       newErrors.testCaseIds = 'É necessário selecionar pelo menos um caso de teste'
     }
@@ -109,6 +125,8 @@ export function CreateTestRunDialog({
         title: title.trim(),
         description: description.trim(),
         milestone: milestone.trim() || undefined,
+        startDate,
+        endDate,
         projectId,
         defaultAssigneeId: defaultAssigneeId || undefined,
         testCaseIds: selectedTestCaseIds,
@@ -170,6 +188,41 @@ export function CreateTestRunDialog({
               onChange={(e) => setMilestone(e.target.value)}
               placeholder="Ex: v1.0"
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="startDate">
+                Data de Início <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className={errors.startDate ? 'border-destructive' : ''}
+              />
+              {errors.startDate && (
+                <p className="text-sm text-destructive">{errors.startDate}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="endDate">
+                Data de Término <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                min={startDate || undefined}
+                className={errors.endDate ? 'border-destructive' : ''}
+              />
+              {errors.endDate && (
+                <p className="text-sm text-destructive">{errors.endDate}</p>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">

@@ -10,6 +10,7 @@ import { EditProjectPage } from './features/project/pages/edit-project-page'
 import { FoldersPage } from './features/folder/pages/folders-page'
 import { TestRunsPage } from './features/testrun/pages/testruns-page'
 import { TestRunExecutionPage } from './features/testrun/pages/testrun-execution-page'
+import { ApplicationsPage } from './features/application/pages/applications-page'
 
 function App() {
   useTheme()
@@ -25,6 +26,7 @@ function App() {
           <Route path="projects/create" element={<CreateProjectPage />} />
           <Route path="projects/:id/edit" element={<EditProjectPage />} />
           <Route path="projects/:id/folders" element={<FoldersPage />} />
+          <Route path="applications" element={<ApplicationsPage />} />
           <Route path="testruns" element={<TestRunsPage />} />
           <Route path="testruns/:id/execute" element={<TestRunExecutionPage />} />
         </Route>

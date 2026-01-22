@@ -21,12 +21,14 @@ interface FolderAccordionProps {
   folderGroups: FolderGroup[]
   onStatusChange: (testRunCaseId: string, newStatus: TestRunCaseStatus) => void
   defaultOpenFolders?: string[]
+  onTestCaseClick?: (testCase: TestRunCase) => void
 }
 
 export function FolderAccordion({
   folderGroups,
   onStatusChange,
   defaultOpenFolders,
+  onTestCaseClick,
 }: FolderAccordionProps) {
   const defaultValue = defaultOpenFolders || folderGroups.map((fg) => fg.folderId)
 
@@ -50,12 +52,13 @@ export function FolderAccordion({
               <FolderProgressBar testCases={folderGroup.testCases} />
             </div>
           </AccordionTrigger>
-          <AccordionContent>
-            <ExecutionTable
-              testCases={folderGroup.testCases}
-              onStatusChange={onStatusChange}
-            />
-          </AccordionContent>
+              <AccordionContent>
+                <ExecutionTable
+                  testCases={folderGroup.testCases}
+                  onStatusChange={onStatusChange}
+                  onTestCaseClick={onTestCaseClick}
+                />
+              </AccordionContent>
         </AccordionItem>
       ))}
     </Accordion>

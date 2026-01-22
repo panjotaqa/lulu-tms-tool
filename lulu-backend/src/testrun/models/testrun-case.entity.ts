@@ -51,6 +51,9 @@ export class TestRunCase {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   snapshotCreatedAt: Date;
 
+  @Column({ type: 'text', nullable: true })
+  evidence: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

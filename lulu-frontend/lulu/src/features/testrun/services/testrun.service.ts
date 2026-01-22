@@ -25,8 +25,14 @@ export interface TestRunCaseResponse {
   status: string
   testCaseSnapshot: object
   snapshotCreatedAt: string
+  evidence: string | null
   createdAt: string
   updatedAt: string
+}
+
+export interface UploadImageResponse {
+  url: string
+  filename: string
 }
 
 export interface TestRunResponse {
@@ -117,6 +123,35 @@ export class TestRunService {
       {
         method: 'PATCH',
         body: JSON.stringify({ status }),
+      }
+    )
+  }
+
+  static async uploadImage(
+    testRunCaseId: string,
+    file: File
+  ): Promise<UploadImageResponse> {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    return apiRequest<UploadImageResponse>(
+      `/upload/test-run-case/${testRunCaseId}`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    )
+  }
+
+  static async updateTestCaseEvidence(
+    testRunCaseId: string,
+    evidence: string | null
+  ): Promise<TestRunCaseResponse> {
+    return apiRequest<TestRunCaseResponse>(
+      `/testruns/cases/${testRunCaseId}/evidence`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ evidence }),
       }
     )
   }

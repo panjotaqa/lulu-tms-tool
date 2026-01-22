@@ -13,6 +13,7 @@ import { UserService } from '../user/user.service';
 import { CreateTestRunDto } from './models/dto/create-testrun.dto';
 import { QueryTestRunDto } from './models/dto/query-testrun.dto';
 import { UpdateTestRunCaseStatusDto } from './models/dto/update-testrun-case-status.dto';
+import { UpdateTestRunCaseEvidenceDto } from './models/dto/update-testrun-case-evidence.dto';
 import { TestRunCaseStatus } from './models/enums/testrun-case-status.enum';
 import { TestRunStatus } from './models/enums/testrun-status.enum';
 import { TestRun } from './models/testrun.entity';
@@ -139,6 +140,8 @@ export class TestRunService {
         title: createTestRunDto.title,
         description: createTestRunDto.description,
         milestone: createTestRunDto.milestone || null,
+        startDate: new Date(createTestRunDto.startDate),
+        endDate: new Date(createTestRunDto.endDate),
         defaultAssigneeId: createTestRunDto.defaultAssigneeId || null,
         projectId: createTestRunDto.projectId,
         status: TestRunStatus.NOT_STARTED,
@@ -301,9 +304,92 @@ export class TestRunService {
       status: updatedTestRunCase.status,
       testCaseSnapshot: updatedTestRunCase.testCaseSnapshot,
       snapshotCreatedAt: updatedTestRunCase.snapshotCreatedAt,
+      evidence: updatedTestRunCase.evidence,
       createdAt: updatedTestRunCase.createdAt,
       updatedAt: updatedTestRunCase.updatedAt,
     };
+  }
+
+  async updateTestCaseEvidence(
+    testRunId: string,
+    testRunCaseId: string,
+    updateDto: UpdateTestRunCaseEvidenceDto,
+  ): Promise<TestRunCaseResponse> {
+    this.debugLogger.debug('TestRunService', 'Atualizando evidências do caso de teste', {
+      testRunId,
+      testRunCaseId,
+    });
+
+    // Verificar se TestRun existe
+    const testRun = await this.testRunRepository.findOne({
+      where: { id: testRunId },
+    });
+
+    if (!testRun) {
+      throw new NotFoundException('Test Run não encontrada');
+    }
+
+    // Buscar TestRunCase e verificar se pertence ao TestRun
+    const testRunCase = await this.testRunCaseRepository.findOne({
+      where: { id: testRunCaseId },
+      relations: ['assignedTo'],
+    });
+
+    if (!testRunCase) {
+      throw new NotFoundException('Caso de teste não encontrado na execução');
+    }
+
+    if (testRunCase.testRunId !== testRunId) {
+      throw new BadRequestException(
+        'Caso de teste não pertence a esta execução de teste',
+      );
+    }
+
+    // Atualizar evidências
+    testRunCase.evidence = updateDto.evidence ?? null;
+    const updatedTestRunCase = await this.testRunCaseRepository.save(testRunCase);
+
+    // Mapear para resposta
+    return {
+      id: updatedTestRunCase.id,
+      testRunId: updatedTestRunCase.testRunId,
+      testCaseId: updatedTestRunCase.testCaseId,
+      assignedToId: updatedTestRunCase.assignedToId,
+      assignedTo: updatedTestRunCase.assignedTo
+        ? {
+            id: updatedTestRunCase.assignedTo.id,
+            name: updatedTestRunCase.assignedTo.name,
+            email: updatedTestRunCase.assignedTo.email,
+          }
+        : null,
+      status: updatedTestRunCase.status,
+      testCaseSnapshot: updatedTestRunCase.testCaseSnapshot,
+      snapshotCreatedAt: updatedTestRunCase.snapshotCreatedAt,
+      evidence: updatedTestRunCase.evidence,
+      createdAt: updatedTestRunCase.createdAt,
+      updatedAt: updatedTestRunCase.updatedAt,
+    };
+  }
+
+  async updateTestCaseEvidenceById(
+    testRunCaseId: string,
+    updateDto: UpdateTestRunCaseEvidenceDto,
+  ): Promise<TestRunCaseResponse> {
+    // Buscar TestRunCase para obter testRunId
+    const testRunCase = await this.testRunCaseRepository.findOne({
+      where: { id: testRunCaseId },
+      relations: ['assignedTo'],
+    });
+
+    if (!testRunCase) {
+      throw new NotFoundException('Caso de teste não encontrado');
+    }
+
+    return this.updateTestCaseEvidence(
+      testRunCase.testRunId,
+      testRunCaseId,
+      updateDto,
+    );
   }
 
   async findByProject(
@@ -401,6 +487,8 @@ export class TestRunService {
           email: testRun.createdBy.email,
         },
         testRunStats: stats,
+        startDate: testRun.startDate,
+        endDate: testRun.endDate,
         createdAt: testRun.createdAt,
         updatedAt: testRun.updatedAt,
       });
@@ -455,6 +543,8 @@ export class TestRunService {
       description: testRun.description,
       milestone: testRun.milestone,
       status: testRun.status,
+      startDate: testRun.startDate,
+      endDate: testRun.endDate,
       defaultAssigneeId: testRun.defaultAssigneeId,
       defaultAssignee: testRun.defaultAssignee
         ? {
@@ -491,6 +581,7 @@ export class TestRunService {
           status: testRunCase.status,
           testCaseSnapshot: testRunCase.testCaseSnapshot,
           snapshotCreatedAt: testRunCase.snapshotCreatedAt,
+          evidence: testRunCase.evidence,
           createdAt: testRunCase.createdAt,
           updatedAt: testRunCase.updatedAt,
         })) || [],

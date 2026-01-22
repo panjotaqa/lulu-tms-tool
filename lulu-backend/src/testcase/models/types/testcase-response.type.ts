@@ -44,6 +44,10 @@ export type TestCaseResponse = {
   preConditions: string | null;
   steps: string[] | null;
   tags: TagResponse[];
+  application?: {
+    id: string;
+    name: string;
+  } | null;
   createdBy: {
     id: string;
     name: string;

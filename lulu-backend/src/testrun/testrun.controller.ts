@@ -23,6 +23,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CreateTestRunDto } from './models/dto/create-testrun.dto';
 import { QueryTestRunDto } from './models/dto/query-testrun.dto';
 import { UpdateTestRunCaseStatusDto } from './models/dto/update-testrun-case-status.dto';
+import { UpdateTestRunCaseEvidenceDto } from './models/dto/update-testrun-case-evidence.dto';
 import {
   PaginatedTestRunListItemResponse,
   PaginatedTestRunResponse,
@@ -306,6 +307,65 @@ export class TestRunController {
   ): Promise<TestRunCaseResponse> {
     return this.testRunService.updateTestCaseStatus(
       testRunId,
+      testRunCaseId,
+      updateDto,
+    );
+  }
+
+  @Patch('cases/:testRunCaseId/evidence')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Atualizar evidências de um caso de teste',
+    description:
+      'Atualiza as evidências (texto em Markdown) de um caso de teste na execução. As evidências podem incluir texto formatado e referências a imagens.',
+  })
+  @ApiParam({
+    name: 'testRunCaseId',
+    type: String,
+    description: 'ID do caso de teste na execução',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Evidências atualizadas com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        testRunId: { type: 'string' },
+        testCaseId: { type: 'string' },
+        assignedToId: { type: 'string', nullable: true },
+        assignedTo: {
+          type: 'object',
+          nullable: true,
+          properties: {
+            id: { type: 'string' },
+            name: { type: 'string' },
+            email: { type: 'string' },
+          },
+        },
+        status: { type: 'string' },
+        testCaseSnapshot: { type: 'object' },
+        snapshotCreatedAt: { type: 'string', format: 'date-time' },
+        evidence: { type: 'string', nullable: true },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos ou caso de teste não pertence à execução',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Caso de teste não encontrado',
+  })
+  async updateTestCaseEvidence(
+    @Param('testRunCaseId') testRunCaseId: string,
+    @Body() updateDto: UpdateTestRunCaseEvidenceDto,
+  ): Promise<TestRunCaseResponse> {
+    return this.testRunService.updateTestCaseEvidenceById(
       testRunCaseId,
       updateDto,
     );

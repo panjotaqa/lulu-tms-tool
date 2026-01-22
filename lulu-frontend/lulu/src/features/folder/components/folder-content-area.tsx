@@ -110,7 +110,7 @@ export function FolderContentArea({
                 Esta pasta ainda não possui casos de teste. Crie seu primeiro
                 caso de teste para começar.
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-center">
                 {onCreateTestCase && (
                   <Button onClick={onCreateTestCase}>
                     <Plus className="w-4 h-4 mr-2" />

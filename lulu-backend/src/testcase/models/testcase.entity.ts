@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Application } from '../../application/models/application.entity';
 import { Folder } from '../../folder/models/folder.entity';
 import { User } from '../../user/models/user.entity';
 import { Tag } from '../../tag/models/tag.entity';
@@ -114,6 +115,13 @@ export class TestCase {
 
   @Column({ name: 'createdBy' })
   createdById: string;
+
+  @ManyToOne(() => Application, { nullable: true })
+  @JoinColumn({ name: 'applicationId' })
+  application: Application | null;
+
+  @Column({ name: 'applicationId', nullable: true })
+  applicationId: string | null;
 
   @OneToMany(() => TestCaseTag, (testCaseTag) => testCaseTag.testCase)
   testCaseTags: TestCaseTag[];

@@ -78,46 +78,38 @@ export function ResizablePanel({
   if (!isOpen) return null
 
   return (
-    <>
-      {/* Overlay */}
+    <div
+      ref={panelRef}
+      className={cn(
+        'absolute right-0 top-0 bottom-0 bg-background border-l shadow-lg z-[100] flex flex-col transition-transform duration-300',
+        isOpen ? 'translate-x-0' : 'translate-x-full'
+      )}
+      style={{ width, height: '100%' }}
+    >
+      {/* Resize handle */}
       <div
-        className="fixed inset-0 bg-black/50 z-40 transition-opacity"
-        onClick={onClose}
-      />
-      {/* Panel */}
-      <div
-        ref={panelRef}
+        ref={resizeRef}
+        onMouseDown={handleMouseDown}
         className={cn(
-          'fixed right-0 top-0 bottom-0 bg-background border-l shadow-lg z-50 flex flex-col transition-transform duration-300',
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+          'absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/50 transition-colors z-10',
+          isResizing && 'bg-primary'
         )}
-        style={{ width }}
-      >
-        {/* Resize handle */}
-        <div
-          ref={resizeRef}
-          onMouseDown={handleMouseDown}
-          className={cn(
-            'absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/50 transition-colors z-10',
-            isResizing && 'bg-primary'
-          )}
-        />
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b shrink-0">
-          {title && <h2 className="text-lg font-semibold">{title}</h2>}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="ml-auto"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto">{children}</div>
+      />
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b shrink-0">
+        {title && <h2 className="text-lg font-semibold">{title}</h2>}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="ml-auto"
+        >
+          <X className="w-4 h-4" />
+        </Button>
       </div>
-    </>
+      {/* Content */}
+      <div className="flex-1 min-h-0">{children}</div>
+    </div>
   )
 }
 

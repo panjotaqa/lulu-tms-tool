@@ -192,5 +192,14 @@ export class UpdateTestCaseDto {
   @IsArray({ message: 'Tags deve ser um array' })
   @IsString({ each: true, message: 'Cada tag deve ser uma string' })
   tags?: string[];
+
+  @ApiProperty({
+    description: 'ID da aplicação',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    required: false,
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'ID da aplicação deve ser um UUID válido' })
+  applicationId?: string | null;
 }
 

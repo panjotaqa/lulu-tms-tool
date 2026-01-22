@@ -86,6 +86,10 @@ export interface TestCaseResponse {
   preConditions: string | null
   steps: string[] | null
   tags: TagResponse[]
+  application?: {
+    id: string
+    name: string
+  } | null
   createdBy: {
     id: string
     name: string
@@ -113,6 +117,7 @@ export interface CreateTestCaseRequest {
   preConditions?: string
   steps?: string[]
   tags?: string[]
+  applicationId?: string
 }
 
 export interface UpdateTestCaseRequest {
@@ -133,6 +138,7 @@ export interface UpdateTestCaseRequest {
   preConditions?: string
   steps?: string[]
   tags?: string[]
+  applicationId?: string | null
 }
 
 export interface MoveTestCasesRequest {

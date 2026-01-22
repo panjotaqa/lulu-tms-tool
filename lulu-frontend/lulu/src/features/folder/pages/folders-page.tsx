@@ -289,7 +289,7 @@ export function FoldersPage() {
   if (!displayNode) {
     return (
       <DndProvider backend={HTML5Backend}>
-        <div className="flex-1 flex -m-6 overflow-hidden min-h-0">
+        <div className="relative flex-1 flex -m-6 overflow-hidden min-h-0">
           <FolderTreeSidebar
             rootNodes={rootNodesFromHook}
             selectedId={null}
@@ -339,7 +339,7 @@ export function FoldersPage() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="flex-1 flex -m-6 overflow-hidden min-h-0">
+      <div className="relative flex-1 flex -m-6 overflow-hidden min-h-0">
         <FolderTreeSidebar
           rootNodes={rootNodesFromHook}
           selectedId={displayNode.id}

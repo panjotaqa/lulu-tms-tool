@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { DebugLoggerService } from '../core/logger/debug-logger.service';
+import { Application } from '../application/models/application.entity';
 import { Folder } from '../folder/models/folder.entity';
 import { Tag } from '../tag/models/tag.entity';
 import { TagService } from '../tag/tag.service';
@@ -67,6 +68,23 @@ export class TestCaseService {
       throw new NotFoundException('Projeto não encontrado para esta pasta');
     }
 
+    // Validar applicationId se fornecido
+    if (createTestCaseDto.applicationId) {
+      const application = await this.dataSource
+        .getRepository(Application)
+        .findOne({
+          where: { id: createTestCaseDto.applicationId },
+        });
+      if (!application) {
+        throw new NotFoundException('Aplicação não encontrada');
+      }
+      if (application.projectId !== folder.projectId) {
+        throw new BadRequestException(
+          'A aplicação deve pertencer ao mesmo projeto da pasta',
+        );
+      }
+    }
+
     // Buscar criador
     const creator = await this.userService.findOne(userId);
     if (!creator) {
@@ -118,6 +136,7 @@ export class TestCaseService {
         description: createTestCaseDto.description || null,
         preConditions: createTestCaseDto.preConditions || null,
         steps: createTestCaseDto.steps || null,
+        applicationId: createTestCaseDto.applicationId || null,
         createdById: userId,
         createdBy: creator as any,
       });
@@ -182,12 +201,45 @@ export class TestCaseService {
     }
 
     // Validar pasta se testSuiteId for fornecido
+    let folder = testCase.testSuite;
     if (updateDto.testSuiteId) {
-      const folder = await this.folderRepository.findOne({
+      const foundFolder = await this.folderRepository.findOne({
         where: { id: updateDto.testSuiteId },
+        relations: ['project'],
       });
-      if (!folder) {
+      if (!foundFolder) {
         throw new NotFoundException('Pasta não encontrada');
+      }
+      folder = foundFolder;
+    }
+
+    // Validar applicationId se fornecido
+    if (updateDto.applicationId !== undefined) {
+      if (updateDto.applicationId === null) {
+        // Permitir remover aplicação
+        testCase.applicationId = null;
+      } else {
+        const application = await this.dataSource
+          .getRepository(Application)
+          .findOne({
+            where: { id: updateDto.applicationId },
+          });
+        if (!application) {
+          throw new NotFoundException('Aplicação não encontrada');
+        }
+        // Validar se a aplicação pertence ao mesmo projeto
+        const targetFolder = updateDto.testSuiteId
+          ? folder
+          : await this.folderRepository.findOne({
+              where: { id: testCase.testSuiteId },
+              relations: ['project'],
+            });
+        if (application.projectId !== targetFolder?.projectId) {
+          throw new BadRequestException(
+            'A aplicação deve pertencer ao mesmo projeto da pasta',
+          );
+        }
+        testCase.applicationId = updateDto.applicationId;
       }
     }
 
@@ -442,7 +494,13 @@ export class TestCaseService {
   async findOne(id: string): Promise<TestCaseResponse> {
     const testCase = await this.testCaseRepository.findOne({
       where: { id },
-      relations: ['testSuite', 'createdBy', 'testCaseTags', 'testCaseTags.tag'],
+      relations: [
+        'testSuite',
+        'createdBy',
+        'testCaseTags',
+        'testCaseTags.tag',
+        'application',
+      ],
       select: {
         id: true,
         testcaseId: true,
@@ -688,6 +746,12 @@ export class TestCaseService {
           createdAt: testCaseTag.tag.createdAt,
           updatedAt: testCaseTag.tag.updatedAt,
         })) || [],
+      application: testCase.application
+        ? {
+            id: testCase.application.id,
+            name: testCase.application.name,
+          }
+        : null,
       createdBy: {
         id: testCase.createdBy.id,
         name: testCase.createdBy.name,

@@ -8,6 +8,8 @@ import { TestRunCaseStatus } from '../types/testrun.types'
 import type { TestRunCase, TestCaseSnapshot } from '../types/testrun.types'
 import type { FolderResponse } from '@/features/folder/types/folder.types'
 import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { TestCaseViewPanel } from '../components/testcase-view-panel'
 import { ArrowLeft } from 'lucide-react'
 
 interface FolderGroup {
@@ -24,6 +26,8 @@ export function TestRunExecutionPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [folderGroups, setFolderGroups] = useState<FolderGroup[]>([])
+  const [selectedTestCase, setSelectedTestCase] = useState<TestRunCase | null>(null)
+  const [isViewPanelOpen, setIsViewPanelOpen] = useState(false)
 
   useEffect(() => {
     if (testRunId) {
@@ -48,7 +52,7 @@ export function TestRunExecutionPage() {
     }
   }
 
-  const groupTestCasesByFolder = async (testRunCases: any[]) => {
+  const groupTestCasesByFolder = async (testRunCases: TestRunCase[]) => {
     const groupsMap = new Map<string, FolderGroup>()
 
     testRunCases.forEach((testCase) => {
@@ -111,7 +115,7 @@ export function TestRunExecutionPage() {
           status: newStatus,
         }
         setTestRun(updatedTestRun)
-        await groupTestCasesByFolder(updatedTestRun.testRunCases as any[])
+        await groupTestCasesByFolder(updatedTestRun.testRunCases)
       }
 
       // Atualizar no backend
@@ -151,8 +155,14 @@ export function TestRunExecutionPage() {
 
   const defaultOpenFolders = folderGroups.map((fg) => fg.folderId)
 
+  const handleTestCaseClick = (testCase: TestRunCase) => {
+    setSelectedTestCase(testCase)
+    setIsViewPanelOpen(true)
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="relative flex-1 flex flex-col min-h-0">
+      <div className="space-y-6 flex-1 overflow-hidden flex flex-col">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
@@ -177,22 +187,55 @@ export function TestRunExecutionPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <FolderAccordion
-              folderGroups={folderGroups}
-              onStatusChange={handleUpdateStatus}
-              defaultOpenFolders={defaultOpenFolders}
-            />
+            <ScrollArea className="h-[calc(100vh-200px)]">
+              <div className="pr-4">
+                <FolderAccordion
+                  folderGroups={folderGroups}
+                  onStatusChange={handleUpdateStatus}
+                  defaultOpenFolders={defaultOpenFolders}
+                  onTestCaseClick={handleTestCaseClick}
+                />
+              </div>
+            </ScrollArea>
           </div>
           <div className="lg:col-span-1">
             <div className="sticky top-6">
               <h2 className="text-xl font-semibold mb-4">Estatísticas</h2>
-              {testRun && (
-                <TestRunStatsPanel testRunCases={testRun.testRunCases as any} />
-              )}
+              <ScrollArea className="h-[calc(100vh-200px)]">
+                <div className="pr-4 pb-12">
+                  {testRun && (
+                    <TestRunStatsPanel testRunCases={testRun.testRunCases as any} />
+                  )}
+                </div>
+              </ScrollArea>
             </div>
           </div>
         </div>
       )}
+      </div>
+
+      <TestCaseViewPanel
+        isOpen={isViewPanelOpen}
+        onClose={() => {
+          setIsViewPanelOpen(false)
+          setSelectedTestCase(null)
+        }}
+        testRunCase={selectedTestCase}
+        onEvidenceUpdate={(testRunCaseId, evidence) => {
+          // Atualizar evidence no testRun local
+          if (testRun) {
+            const updatedTestRun = {
+              ...testRun,
+              testRunCases: testRun.testRunCases.map((tc) =>
+                tc.id === testRunCaseId ? { ...tc, evidence } : tc
+              ),
+            }
+            setTestRun(updatedTestRun)
+            // Atualizar folderGroups também
+            groupTestCasesByFolder(updatedTestRun.testRunCases)
+          }
+        }}
+      />
     </div>
   )
 }

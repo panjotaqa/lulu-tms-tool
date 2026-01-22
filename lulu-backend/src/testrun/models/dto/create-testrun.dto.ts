@@ -2,12 +2,34 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   ArrayMinSize,
   IsArray,
+  IsDateString,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
+  Validate,
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
 } from 'class-validator';
+
+@ValidatorConstraint({ name: 'endDateAfterStartDate', async: false })
+export class EndDateAfterStartDateConstraint
+  implements ValidatorConstraintInterface
+{
+  validate(endDate: string, args: ValidationArguments): boolean {
+    const dto = args.object as CreateTestRunDto;
+    if (!dto.startDate || !endDate) {
+      return true; // Let @IsNotEmpty handle empty values
+    }
+    return new Date(endDate) >= new Date(dto.startDate);
+  }
+
+  defaultMessage(args: ValidationArguments): string {
+    return 'Data de término deve ser posterior ou igual à data de início';
+  }
+}
 
 export class CreateTestRunDto {
   @ApiProperty({
@@ -36,6 +58,27 @@ export class CreateTestRunDto {
   @IsString({ message: 'Milestone deve ser uma string' })
   @MaxLength(255, { message: 'Milestone deve ter no máximo 255 caracteres' })
   milestone?: string;
+
+  @ApiProperty({
+    description: 'Data de início da execução de teste',
+    example: '2024-01-15',
+    type: String,
+    format: 'date',
+  })
+  @IsNotEmpty({ message: 'Data de início é obrigatória' })
+  @IsDateString({}, { message: 'Data de início deve ser uma data válida (formato ISO 8601)' })
+  startDate: string;
+
+  @ApiProperty({
+    description: 'Data de término da execução de teste',
+    example: '2024-01-20',
+    type: String,
+    format: 'date',
+  })
+  @IsNotEmpty({ message: 'Data de término é obrigatória' })
+  @IsDateString({}, { message: 'Data de término deve ser uma data válida (formato ISO 8601)' })
+  @Validate(EndDateAfterStartDateConstraint)
+  endDate: string;
 
   @ApiProperty({
     description: 'ID do usuário atribuído por padrão a todos os casos de teste',

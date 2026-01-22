@@ -11,6 +11,9 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { TagAutocomplete } from './tag-autocomplete'
+import { FolderService } from '@/features/folder/services/folder.service'
+import { ApplicationService } from '@/features/application/services/application.service'
+import type { ApplicationResponse } from '@/features/application/types/application.types'
 import type {
   CreateTestCaseRequest,
   UpdateTestCaseRequest,
@@ -65,7 +68,17 @@ export function TestCaseForm({
   const [preConditions, setPreConditions] = useState('')
   const [steps, setSteps] = useState<string[]>([''])
   const [tags, setTags] = useState<string[]>([])
+  const [applicationId, setApplicationId] = useState<string>('')
+  const [applications, setApplications] = useState<ApplicationResponse[]>([])
+  const [isLoadingApplications, setIsLoadingApplications] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Carregar aplicações do projeto quando folderId mudar
+  useEffect(() => {
+    if (folderId) {
+      loadApplications()
+    }
+  }, [folderId])
 
   // Pré-preencher campos quando testCase for fornecido
   useEffect(() => {
@@ -90,8 +103,34 @@ export function TestCaseForm({
           : ['']
       )
       setTags(testCase.tags ? testCase.tags.map((tag) => tag.name) : [])
+      setApplicationId(testCase.application?.id || '')
+    } else {
+      setApplicationId('')
     }
   }, [testCase])
+
+  const loadApplications = async () => {
+    if (!folderId) return
+
+    setIsLoadingApplications(true)
+    try {
+      // Buscar hierarquia da pasta para obter projectId
+      const hierarchy = await FolderService.getHierarchy(folderId)
+      if (hierarchy.length > 0) {
+        const projectId = hierarchy[0].projectId
+        const response = await ApplicationService.findAll({
+          projectId,
+          page: 1,
+          limit: 100,
+        })
+        setApplications(response.data)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar aplicações:', error)
+    } finally {
+      setIsLoadingApplications(false)
+    }
+  }
 
   const handleAddStep = () => {
     setSteps([...steps, ''])
@@ -147,6 +186,7 @@ export function TestCaseForm({
           ? steps.filter((step) => step.trim())
           : undefined,
         tags: tags.length > 0 ? tags : undefined,
+        applicationId: applicationId || null,
       }
       await onSubmit(data)
     } else {
@@ -170,6 +210,7 @@ export function TestCaseForm({
           ? steps.filter((step) => step.trim())
           : undefined,
         tags: tags.length > 0 ? tags : undefined,
+        applicationId: applicationId ? applicationId : undefined,
       }
       await onSubmit(data)
     }
@@ -177,7 +218,7 @@ export function TestCaseForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className="flex-1 p-6 space-y-6">
         {/* Título */}
         <div className="space-y-2">
           <Label htmlFor="title">
@@ -439,6 +480,28 @@ export function TestCaseForm({
           >
             Adicionar Step
           </Button>
+        </div>
+
+        {/* Application */}
+        <div className="space-y-2">
+          <Label htmlFor="application">Aplicação</Label>
+          <Select
+            value={applicationId}
+            onValueChange={setApplicationId}
+            disabled={isLoadingApplications}
+          >
+            <SelectTrigger id="application">
+              <SelectValue placeholder="Selecione uma aplicação (opcional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Nenhuma</SelectItem>
+              {applications.map((application) => (
+                <SelectItem key={application.id} value={application.id}>
+                  {application.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Tags */}
