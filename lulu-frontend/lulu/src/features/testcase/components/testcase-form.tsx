@@ -494,7 +494,7 @@ export function TestCaseForm({
               <SelectValue placeholder="Selecione uma aplicação (opcional)" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Nenhuma</SelectItem>
+              <SelectItem value="none">Nenhuma</SelectItem>
               {applications.map((application) => (
                 <SelectItem key={application.id} value={application.id}>
                   {application.name}
