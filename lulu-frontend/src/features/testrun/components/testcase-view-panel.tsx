@@ -13,6 +13,7 @@ import type { TestRunCase } from '../types/testrun.types'
 import { useImageUpload } from '../hooks/use-image-upload'
 import { TestRunService } from '../services/testrun.service'
 import { useDebounce } from '@/hooks/use-debounce'
+import { FEATURE_TOGGLES } from '@/lib/feature-toggles'
 
 interface TestCaseViewPanelProps {
   isOpen: boolean
@@ -121,6 +122,8 @@ export function TestCaseViewPanel({
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
+      if (!FEATURE_TOGGLES.ENABLE_IMAGE_UPLOAD) return
+
       const file = e.dataTransfer.files[0]
       if (file && file.type.startsWith('image/')) {
         handleImageUpload(file)
@@ -136,7 +139,8 @@ export function TestCaseViewPanel({
   // Handler para colar imagens (Ctrl+V)
   const handlePaste = useCallback(
     async (e: ClipboardEvent) => {
-      if (!isEditMode || !testRunCase) return
+      if (!isEditMode || !testRunCase || !FEATURE_TOGGLES.ENABLE_IMAGE_UPLOAD)
+        return
 
       const items = e.clipboardData?.items
       if (!items) return
@@ -273,40 +277,45 @@ export function TestCaseViewPanel({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label>Evidências</Label>
-                {isEditMode && (
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="image-upload">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        type="button"
-                        asChild
-                        disabled={isUploading}
-                      >
-                        <span>
-                          {isUploading ? (
-                            <>
-                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              Enviando...
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="w-4 h-4 mr-2" />
-                              Upload Imagem
-                            </>
-                          )}
-                        </span>
-                      </Button>
-                    </label>
-                    <input
-                      id="image-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileInput}
-                      className="hidden"
-                    />
-                  </div>
-                )}
+                {isEditMode &&
+                  (FEATURE_TOGGLES.ENABLE_IMAGE_UPLOAD ? (
+                    <div className="flex items-center gap-2">
+                      <label htmlFor="image-upload">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          type="button"
+                          asChild
+                          disabled={isUploading}
+                        >
+                          <span>
+                            {isUploading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Enviando...
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="w-4 h-4 mr-2" />
+                                Upload Imagem
+                              </>
+                            )}
+                          </span>
+                        </Button>
+                      </label>
+                      <input
+                        id="image-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileInput}
+                        className="hidden"
+                      />
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground mr-2">
+                      Upload de imagens desativado (somente texto)
+                    </span>
+                  ))}
               </div>
 
               {isEditMode ? (

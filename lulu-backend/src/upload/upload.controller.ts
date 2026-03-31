@@ -7,8 +7,10 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { FEATURE_TOGGLES } from '../core/constants/feature-toggles';
 import {
   ApiBearerAuth,
   ApiConsumes,
@@ -65,8 +67,14 @@ export class UploadController {
     @Param('testRunCaseId') testRunCaseId: string,
     @UploadedFile() file: MulterFile | undefined,
   ) {
+    if (!FEATURE_TOGGLES.ENABLE_IMAGE_UPLOAD) {
+      throw new BadRequestException(
+        'O upload de imagens está temporariamente desativado. O campo aceita apenas texto.',
+      );
+    }
+
     if (!file) {
-      throw new Error('Arquivo não fornecido');
+      throw new BadRequestException('Arquivo não fornecido');
     }
 
     return this.uploadService.uploadImage(testRunCaseId, file);
