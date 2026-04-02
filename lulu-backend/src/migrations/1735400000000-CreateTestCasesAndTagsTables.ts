@@ -6,9 +6,7 @@ import {
   TableIndex,
 } from 'typeorm';
 
-export class CreateTestCasesAndTagsTables1735400000000
-  implements MigrationInterface
-{
+export class CreateTestCasesAndTagsTables1735400000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Criar tabela tags
     await queryRunner.createTable(
@@ -283,10 +281,7 @@ export class CreateTestCasesAndTagsTables1735400000000
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex(
-      'testcase_tags',
-      'IDX_testcase_tags_unique',
-    );
+    await queryRunner.dropIndex('testcase_tags', 'IDX_testcase_tags_unique');
     await queryRunner.dropTable('testcase_tags');
     await queryRunner.dropIndex('testcases', 'IDX_testcases_testSuiteId');
     await queryRunner.dropTable('testcases');
@@ -294,4 +289,3 @@ export class CreateTestCasesAndTagsTables1735400000000
     await queryRunner.dropTable('tags');
   }
 }
-

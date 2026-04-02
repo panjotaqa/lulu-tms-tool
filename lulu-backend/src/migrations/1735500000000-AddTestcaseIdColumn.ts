@@ -35,4 +35,3 @@ export class AddTestcaseIdColumn1735500000000 implements MigrationInterface {
     await queryRunner.dropColumn('testcases', 'testcaseId');
   }
 }
-

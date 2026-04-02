@@ -1,7 +1,8 @@
+import { Server } from 'http';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
-import { AppModule } from 'src/app.module';
+import { AppModule } from '@/app/app.module';
 
 describe('UserController (e2e)', () => {
   let app: INestApplication;
@@ -34,14 +35,18 @@ describe('UserController (e2e)', () => {
         password: 'senhaSegura123',
       };
 
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post('/users')
         .send(createUserDto)
         .expect(201)
         .expect((res) => {
           expect(res.body).toHaveProperty('id');
-          expect(res.body.name).toBe(createUserDto.name);
-          expect(res.body.email).toBe(createUserDto.email);
+          expect((res.body as Record<string, unknown>).name).toBe(
+            createUserDto.name,
+          );
+          expect((res.body as Record<string, unknown>).email).toBe(
+            createUserDto.email,
+          );
           expect(res.body).not.toHaveProperty('password');
           expect(res.body).toHaveProperty('createdAt');
           expect(res.body).toHaveProperty('updatedAt');
@@ -55,7 +60,7 @@ describe('UserController (e2e)', () => {
         password: 'senhaSegura123',
       };
 
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post('/users')
         .send(createUserDto)
         .expect(400);
@@ -68,7 +73,7 @@ describe('UserController (e2e)', () => {
         password: '12345',
       };
 
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post('/users')
         .send(createUserDto)
         .expect(400);
@@ -80,7 +85,7 @@ describe('UserController (e2e)', () => {
         password: 'senhaSegura123',
       };
 
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post('/users')
         .send(createUserDto)
         .expect(400);
@@ -92,7 +97,7 @@ describe('UserController (e2e)', () => {
         password: 'senhaSegura123',
       };
 
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post('/users')
         .send(createUserDto)
         .expect(400);
@@ -104,7 +109,7 @@ describe('UserController (e2e)', () => {
         email: 'joao.silva@example.com',
       };
 
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post('/users')
         .send(createUserDto)
         .expect(400);
@@ -117,16 +122,15 @@ describe('UserController (e2e)', () => {
         password: 'senhaSegura123',
       };
 
-      await request(app.getHttpServer())
+      await request(app.getHttpServer() as Server)
         .post('/users')
         .send(createUserDto)
         .expect(201);
 
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post('/users')
         .send(createUserDto)
         .expect(409);
     });
   });
 });
-

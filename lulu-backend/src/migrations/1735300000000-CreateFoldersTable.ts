@@ -118,9 +118,14 @@ export class CreateFoldersTable1735300000000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex('folders', 'IDX_folders_project_parent_position_unique');
-    await queryRunner.dropIndex('folders', 'IDX_folders_project_parent_position');
+    await queryRunner.dropIndex(
+      'folders',
+      'IDX_folders_project_parent_position_unique',
+    );
+    await queryRunner.dropIndex(
+      'folders',
+      'IDX_folders_project_parent_position',
+    );
     await queryRunner.dropTable('folders');
   }
 }
-

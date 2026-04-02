@@ -144,4 +144,3 @@ export class CreateProjectsTable1735200000000 implements MigrationInterface {
     await queryRunner.dropTable('projects');
   }
 }
-

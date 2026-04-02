@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
-export class AddStartDateEndDateToTestRuns1735800000000
-  implements MigrationInterface
-{
+export class AddStartDateEndDateToTestRuns1735800000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Adicionar coluna startDate (permitir NULL temporariamente para dados existentes)
     await queryRunner.addColumn(
@@ -45,4 +43,3 @@ export class AddStartDateEndDateToTestRuns1735800000000
     await queryRunner.dropColumn('test_runs', 'startDate');
   }
 }
-

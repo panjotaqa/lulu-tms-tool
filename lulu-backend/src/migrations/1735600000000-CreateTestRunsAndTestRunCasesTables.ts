@@ -6,9 +6,7 @@ import {
   TableIndex,
 } from 'typeorm';
 
-export class CreateTestRunsAndTestRunCasesTables1735600000000
-  implements MigrationInterface
-{
+export class CreateTestRunsAndTestRunCasesTables1735600000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Criar tabela test_runs
     await queryRunner.createTable(
@@ -226,8 +224,14 @@ export class CreateTestRunsAndTestRunCasesTables1735600000000
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Remover índices
-    await queryRunner.dropIndex('test_run_cases', 'IDX_test_run_cases_testCaseId');
-    await queryRunner.dropIndex('test_run_cases', 'IDX_test_run_cases_testRunId');
+    await queryRunner.dropIndex(
+      'test_run_cases',
+      'IDX_test_run_cases_testCaseId',
+    );
+    await queryRunner.dropIndex(
+      'test_run_cases',
+      'IDX_test_run_cases_testRunId',
+    );
     await queryRunner.dropIndex('test_runs', 'IDX_test_runs_createdById');
     await queryRunner.dropIndex('test_runs', 'IDX_test_runs_projectId');
 
@@ -254,4 +258,3 @@ export class CreateTestRunsAndTestRunCasesTables1735600000000
     await queryRunner.dropTable('test_runs');
   }
 }
-

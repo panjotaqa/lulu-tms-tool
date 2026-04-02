@@ -5,9 +5,7 @@ import {
   TableIndex,
 } from 'typeorm';
 
-export class AddStatusToTestRunsAndTestRunCases1735700000000
-  implements MigrationInterface
-{
+export class AddStatusToTestRunsAndTestRunCases1735700000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Adicionar coluna status na tabela test_runs
     await queryRunner.addColumn(
@@ -61,4 +59,3 @@ export class AddStatusToTestRunsAndTestRunCases1735700000000
     await queryRunner.dropColumn('test_runs', 'status');
   }
 }
-

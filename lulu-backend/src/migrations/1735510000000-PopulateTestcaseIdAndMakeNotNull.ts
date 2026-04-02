@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
-export class PopulateTestcaseIdAndMakeNotNull1735510000000
-  implements MigrationInterface
-{
+export class PopulateTestcaseIdAndMakeNotNull1735510000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Script para povoar testcaseId
     // Agrupa por projeto e gera IDs sequenciais
@@ -65,4 +63,3 @@ export class PopulateTestcaseIdAndMakeNotNull1735510000000
     `);
   }
 }
-

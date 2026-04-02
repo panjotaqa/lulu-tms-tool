@@ -5,9 +5,7 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class AddApplicationToTestCases1736100000000
-  implements MigrationInterface
-{
+export class AddApplicationToTestCases1736100000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.addColumn(
       'testcases',
@@ -44,4 +42,3 @@ export class AddApplicationToTestCases1736100000000
     await queryRunner.dropColumn('testcases', 'applicationId');
   }
 }
-
