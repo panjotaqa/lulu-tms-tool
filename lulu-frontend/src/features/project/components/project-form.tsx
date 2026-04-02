@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form'
+import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { projectSchema, type ProjectFormData, type Project } from '../types/project.types'
 import { Button } from '@/components/ui/button'
@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 interface ProjectFormProps {
   project?: Project
-  onSubmit: (data: ProjectFormData) => void
+  onSubmit: SubmitHandler<ProjectFormData>
   onCancel: () => void
   isLoading?: boolean
 }

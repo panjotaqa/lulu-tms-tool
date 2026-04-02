@@ -32,7 +32,7 @@ export const projectSchema = z.object({
       'O slug deve conter apenas letras minúsculas, números e hífens'
     ),
   description: z.string().max(500, 'A descrição deve ter no máximo 500 caracteres').optional(),
-  isArchived: z.boolean().default(false),
+  isArchived: z.boolean(),
 })
 
 export type ProjectFormData = z.infer<typeof projectSchema>

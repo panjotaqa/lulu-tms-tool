@@ -20,7 +20,7 @@ RUN npm install --only=production --legacy-peer-deps && npm cache clean --force
 
 COPY --from=builder /app/dist ./dist
 
-EXPOSE 3000
+EXPOSE 5533
 
-CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "migration:start:prod"]
 

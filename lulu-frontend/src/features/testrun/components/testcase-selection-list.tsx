@@ -33,9 +33,6 @@ export function TestCaseSelectionList({
   const isAllSelected =
     filteredTestCases.length > 0 &&
     filteredTestCases.every((tc) => selectedIds.has(tc.id))
-  const isAnySelected =
-    filteredTestCases.length > 0 &&
-    filteredTestCases.some((tc) => selectedIds.has(tc.id))
 
   if (filteredTestCases.length === 0) {
     return (

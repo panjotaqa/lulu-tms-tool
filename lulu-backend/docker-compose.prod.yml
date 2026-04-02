@@ -33,9 +33,9 @@ services:
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
       DATABASE_NAME: ${DATABASE_NAME:-lulu_db}
       NODE_ENV: production
-      PORT: 3000
+      PORT: 5533
     ports:
-      - '${PORT:-3000}:3000'
+      - '${PORT:-5533}:5533'
     depends_on:
       postgres:
         condition: service_healthy

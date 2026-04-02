@@ -7,7 +7,7 @@ interface UseProjectsOptions {
   pageSize?: number
 }
 
-interface UseProjectsReturn {
+export interface UseProjectsReturn {
   projects: Project[]
   isLoading: boolean
   error: string | null

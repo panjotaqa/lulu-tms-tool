@@ -2,7 +2,8 @@ import { apiRequest, type ApiError } from '@/lib/api'
 import type {
   CreateTestRunRequest,
   PaginatedTestRunResponse,
-  TestRun,
+  TestRunAuthor,
+  TestRunCase,
 } from '../types/testrun.types'
 
 export interface QueryTestRunParams {
@@ -12,23 +13,7 @@ export interface QueryTestRunParams {
   status?: string
 }
 
-export interface TestRunCaseResponse {
-  id: string
-  testRunId: string
-  testCaseId: string
-  assignedToId: string | null
-  assignedTo: {
-    id: string
-    name: string
-    email: string
-  } | null
-  status: string
-  testCaseSnapshot: object
-  snapshotCreatedAt: string
-  evidence: string | null
-  createdAt: string
-  updatedAt: string
-}
+export interface TestRunCaseResponse extends TestRunCase {}
 
 export interface UploadImageResponse {
   url: string
@@ -42,11 +27,7 @@ export interface TestRunResponse {
   milestone: string | null
   status: string
   defaultAssigneeId: string | null
-  defaultAssignee: {
-    id: string
-    name: string
-    email: string
-  } | null
+  defaultAssignee: TestRunAuthor | null
   projectId: string
   project: {
     id: string

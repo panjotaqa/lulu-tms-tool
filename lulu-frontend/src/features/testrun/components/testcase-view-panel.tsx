@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import MDEditor from '@uiw/react-md-editor'
 import '@uiw/react-md-editor/markdown-editor.css'
 import ReactMarkdown from 'react-markdown'
-import { Edit2, Eye, Save, X, Upload, Loader2 } from 'lucide-react'
+import { Edit2, Eye, Save, Upload, Loader2 } from 'lucide-react'
 import type { TestRunCase } from '../types/testrun.types'
 import { useImageUpload } from '../hooks/use-image-upload'
 import { TestRunService } from '../services/testrun.service'
@@ -329,7 +329,7 @@ export function TestCaseViewPanel({
                     onChange={(value) => setEvidence(value || '')}
                     preview="live"
                     hideToolbar={false}
-                    visibleDragBar={false}
+                    visibleDragbar={false}
                     data-color-mode="dark"
                   />
                 </div>

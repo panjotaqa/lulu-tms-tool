@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { Label, Pie, PieChart } from 'recharts'
 import {
   ChartContainer,
@@ -150,7 +149,7 @@ export function LayerChart({ testRunCases }: LayerChartProps) {
       <CardContent className="pt-0">
         <div className="flex items-center justify-center gap-3 flex-wrap">
           {chartData.map((item) => {
-            const config = chartConfig[item.layer as keyof typeof chartConfig]
+            const config = chartConfig[item.layer as Exclude<keyof typeof chartConfig, 'count'>]
             return (
               <div
                 key={item.layer}

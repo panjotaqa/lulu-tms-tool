@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { TestRunService, type TestRunResponse } from '../services/testrun.service'
+import { TestRunService, type TestRunResponse, type TestRunCaseResponse } from '../services/testrun.service'
 import { FolderAccordion } from '../components/folder-accordion'
 import { TestRunStatsPanel } from '../components/testrun-stats-panel'
 import { FolderService } from '@/features/folder/services/folder.service'
@@ -42,8 +42,18 @@ export function TestRunExecutionPage() {
     setError(null)
     try {
       const data = await TestRunService.findOne(testRunId)
-        setTestRun(data)
-        await groupTestCasesByFolder(data.testRunCases)
+      
+      const mappedTestRunCases: TestRunCase[] = data.testRunCases.map((tc) => ({
+        ...tc,
+        status: tc.status as TestRunCaseStatus,
+        testCaseSnapshot: tc.testCaseSnapshot as TestCaseSnapshot,
+      } as TestRunCase))
+
+      setTestRun({
+        ...data,
+        testRunCases: mappedTestRunCases as unknown as TestRunCaseResponse[],
+      })
+      await groupTestCasesByFolder(mappedTestRunCases)
     } catch (err) {
       setError('Erro ao carregar execução de teste')
       console.error('Erro ao carregar Test Run:', err)
@@ -232,7 +242,12 @@ export function TestRunExecutionPage() {
             }
             setTestRun(updatedTestRun)
             // Atualizar folderGroups também
-            groupTestCasesByFolder(updatedTestRun.testRunCases)
+            const mappedTestRunCases: TestRunCase[] = updatedTestRun.testRunCases.map((tc) => ({
+              ...tc,
+              status: tc.status as TestRunCaseStatus,
+              testCaseSnapshot: tc.testCaseSnapshot as TestCaseSnapshot,
+            } as TestRunCase))
+            groupTestCasesByFolder(mappedTestRunCases)
           }
         }}
       />

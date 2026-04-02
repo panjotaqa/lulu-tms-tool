@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { Label, Pie, PieChart } from 'recharts'
 import {
   ChartContainer,
@@ -24,7 +23,8 @@ export function StatusChart({ testRunCases }: StatusChartProps) {
   }
 
   testRunCases.forEach((tc) => {
-    statusCounts[tc.status] = (statusCounts[tc.status] || 0) + 1
+    const status = tc.status as TestRunCaseStatus
+    statusCounts[status] = (statusCounts[status] || 0) + 1
   })
 
   const total = testRunCases.length
@@ -165,7 +165,7 @@ export function StatusChart({ testRunCases }: StatusChartProps) {
       <CardContent className="pt-0">
         <div className="flex items-center justify-center gap-3 flex-wrap">
           {chartData.map((item) => {
-            const config = chartConfig[item.status as keyof typeof chartConfig]
+            const config = chartConfig[item.status as Exclude<keyof typeof chartConfig, 'count'>]
             return (
               <div
                 key={item.status}

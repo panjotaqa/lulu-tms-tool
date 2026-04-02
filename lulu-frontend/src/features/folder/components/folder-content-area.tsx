@@ -28,7 +28,6 @@ interface FolderContentAreaProps {
 
 export function FolderContentArea({
   folderName,
-  folderId,
   breadcrumbs,
   onNavigate,
   onCreateTestCase,

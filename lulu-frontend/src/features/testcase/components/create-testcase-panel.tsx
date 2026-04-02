@@ -3,7 +3,7 @@ import { ResizablePanel } from '@/components/ui/resizable-panel'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { TestCaseForm } from './testcase-form'
 import { useToast } from '@/hooks/use-toast'
-import type { CreateTestCaseRequest } from '../types/testcase.types'
+import type { CreateTestCaseRequest, UpdateTestCaseRequest } from '../types/testcase.types'
 import { TestCaseService } from '../services/testcase.service'
 
 interface CreateTestCasePanelProps {
@@ -22,10 +22,10 @@ export function CreateTestCasePanel({
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = async (data: CreateTestCaseRequest) => {
+  const handleSubmit = async (data: CreateTestCaseRequest | UpdateTestCaseRequest) => {
     setIsLoading(true)
     try {
-      await TestCaseService.create(data)
+      await TestCaseService.create(data as CreateTestCaseRequest)
       toast({
         title: 'Sucesso',
         description: 'Caso de teste criado com sucesso',
