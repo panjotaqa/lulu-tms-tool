@@ -13,9 +13,19 @@ async function bootstrap() {
     prefix: '/uploads',
   });
 
-  // CORS configuration
+  const allowedOrigins = [
+    process.env.FRONTEND_URL || 'http://localhost:8080',
+    'http://localhost:8080',
+    'http://localhost:5173',
+  ];
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:8080',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, Swagger)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS blocked: ${origin}`));
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,

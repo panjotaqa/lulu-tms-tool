@@ -34,6 +34,9 @@ services:
       DATABASE_NAME: ${DATABASE_NAME:-lulu_db}
       NODE_ENV: production
       PORT: 5533
+      JWT_SECRET: ${JWT_SECRET:-changeme}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-86400}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
     ports:
       - '${PORT:-5533}:5533'
     depends_on:
