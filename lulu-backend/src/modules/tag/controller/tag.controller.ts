@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Query,
   UseGuards,
+  Inject,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { TagControllerDocs } from './tag.controller.doc';
@@ -12,13 +13,17 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { QueryTagDto } from '../models/dto/query-tag.dto';
 import { TagService } from '../service/tag.service';
 import { TagResponse } from '../models/types/tag-response.type';
+import { TAG_SERVICE } from '@/modules/core/constants/services.constants';
 
 @ApiTags('tags')
 @Controller('tags')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class TagController {
-  constructor(private readonly tagService: TagService) {}
+  constructor(
+    @Inject(TAG_SERVICE)
+    private readonly tagService: TagService,
+  ) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)

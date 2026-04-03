@@ -6,4 +6,6 @@ export const createBaseRepository = <T>(): jest.Mocked<IBaseRepository<T>> => ({
   remove: jest.fn(),
   findOne: jest.fn(),
   find: jest.fn(),
+  findAndCount: jest.fn(),
+  count: jest.fn(),
 });

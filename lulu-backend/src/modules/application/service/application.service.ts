@@ -1,14 +1,12 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { DebugLoggerService } from '@/modules/core/logger/debug-logger.service';
 import { ProjectService } from '@/modules/project/service/project.service';
-import { TestCase } from '@/modules/testcase/models/entity/testcase.entity';
 import { CreateApplicationDto } from '../models/dto/create-application.dto';
 import { QueryApplicationDto } from '../models/dto/query-application.dto';
 import { UpdateApplicationDto } from '../models/dto/update-application.dto';
@@ -18,13 +16,22 @@ import {
   PaginatedApplicationResponse,
 } from '../models/types/application-response.type';
 
+import { IApplicationService } from './application.service.interface';
+import { APPLICATION_REPOSITORY } from '@/modules/core/constants/repositories.constants';
+import { TESTCASE_REPOSITORY } from '@/modules/core/constants/repositories.constants';
+import { PROJECT_SERVICE } from '@/modules/core/constants/services.constants';
+
+import { ApplicationRepository } from '../repository/application.repository';
+import { TestCaseRepository } from '@/modules/testcase/repository/testcase.repository';
+
 @Injectable()
-export class ApplicationService {
+export class ApplicationService implements IApplicationService {
   constructor(
-    @InjectRepository(Application)
-    private readonly applicationRepository: Repository<Application>,
-    @InjectRepository(TestCase)
-    private readonly testCaseRepository: Repository<TestCase>,
+    @Inject(APPLICATION_REPOSITORY)
+    private readonly applicationRepository: ApplicationRepository,
+    @Inject(TESTCASE_REPOSITORY)
+    private readonly testCaseRepository: TestCaseRepository,
+    @Inject(PROJECT_SERVICE)
     private readonly projectService: ProjectService,
     private readonly debugLogger: DebugLoggerService,
   ) {}

@@ -9,8 +9,6 @@ import {
   TestRunResponse,
 } from '../models/types/testrun-response.type';
 
-export const ITestRunService = Symbol('ITestRunService');
-
 export interface ITestRunService {
   create(
     createTestRunDto: CreateTestRunDto,

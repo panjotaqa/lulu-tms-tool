@@ -9,12 +9,11 @@ import {
   Post,
   Query,
   UseGuards,
+  Inject,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { TestRunControllerDocs } from './testrun.controller.doc';
+import { TESTRUN_SERVICE } from '@/modules/core/constants/services.constants';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { CreateTestRunDto } from '../models/dto/create-testrun.dto';
@@ -33,7 +32,10 @@ import { TestRunService } from '../service/testrun.service';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class TestRunController {
-  constructor(private readonly testRunService: TestRunService) {}
+  constructor(
+    @Inject(TESTRUN_SERVICE)
+    private readonly testRunService: TestRunService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

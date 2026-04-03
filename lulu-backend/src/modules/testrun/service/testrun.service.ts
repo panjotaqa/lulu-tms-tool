@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -31,16 +32,24 @@ import { ITestRunService } from './testrun.service.interface';
 
 import { TestRunRepository } from '../repository/testrun.repository';
 import { TestRunCaseRepository } from '../repository/testruncase.repository';
+import {
+  TESTRUN_REPOSITORY,
+  TESTRUNCASE_REPOSITORY,
+} from '@/modules/core/constants/repositories.constants';
+import { USER_SERVICE } from '@/modules/core/constants/services.constants';
 
 @Injectable()
 export class TestRunService implements ITestRunService {
   constructor(
+    @Inject(TESTRUN_REPOSITORY)
     private readonly testRunRepository: TestRunRepository,
+    @Inject(TESTRUNCASE_REPOSITORY)
     private readonly testRunCaseRepository: TestRunCaseRepository,
     @InjectRepository(TestCase)
     private readonly testCaseRepository: Repository<TestCase>,
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
+    @Inject(USER_SERVICE)
     private readonly userService: UserService,
     private readonly dataSource: DataSource,
     private readonly debugLogger: DebugLoggerService,

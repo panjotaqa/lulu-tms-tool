@@ -10,4 +10,4 @@ export const createTestRunRepositoryMock =
       update: jest.fn(),
       delete: jest.fn(),
       createQueryBuilder: jest.fn(),
-    } as unknown as jest.Mocked<ITestRunRepository>);
+    }) as unknown as jest.Mocked<ITestRunRepository>;

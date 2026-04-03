@@ -1,13 +1,17 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { USER_SERVICE } from '@/modules/core/constants/services.constants';
 import { UserService } from '../../user/service/user.service';
 import { AuthResponseDto } from '../models/dto/auth-response.dto';
 import { LoginDto } from '../models/dto/login.dto';
 
+import { IAuthService } from './auth.service.interface';
+
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthService {
   constructor(
+    @Inject(USER_SERVICE)
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
   ) {}

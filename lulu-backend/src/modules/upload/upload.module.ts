@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { TestRunCase } from '../testrun/models/entity/testrun-case.entity';
 import { UploadController } from './upload.controller';
 import { UploadService } from './upload.service';
+import { UPLOAD_SERVICE } from '@/modules/core/constants/services.constants';
+import { TestRunModule } from '../testrun/testrun.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TestRunCase])],
+  imports: [TestRunModule],
   controllers: [UploadController],
-  providers: [UploadService],
-  exports: [UploadService],
+  providers: [{ provide: UPLOAD_SERVICE, useClass: UploadService }],
+  exports: [UPLOAD_SERVICE],
 })
 export class UploadModule {}

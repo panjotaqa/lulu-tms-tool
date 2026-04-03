@@ -22,14 +22,20 @@ import {
 } from '../models/types/project-response.type';
 import type { IProjectRepository } from '../repository/project.repository.interface';
 import { IProjectService } from './project.service.interface';
+import { PROJECT_REPOSITORY } from '@/modules/core/constants/repositories.constants';
+import {
+  USER_SERVICE,
+  FOLDER_SERVICE,
+} from '@/modules/core/constants/services.constants';
 
 @Injectable()
 export class ProjectService implements IProjectService {
   constructor(
-    @Inject('IProjectRepository')
+    @Inject(PROJECT_REPOSITORY)
     private readonly projectRepository: IProjectRepository,
+    @Inject(USER_SERVICE)
     private readonly userService: UserService,
-    @Inject(forwardRef(() => FolderService))
+    @Inject(forwardRef(() => FOLDER_SERVICE))
     private readonly _folderService: FolderService,
     private readonly dataSource: DataSource,
     private readonly debugLogger: DebugLoggerService,

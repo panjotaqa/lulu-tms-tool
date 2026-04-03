@@ -9,8 +9,6 @@ import {
   TestCaseResponse,
 } from '../models/types/testcase-response.type';
 
-export const ITestCaseService = Symbol('ITestCaseService');
-
 export interface ITestCaseService {
   create(
     createTestCaseDto: CreateTestCaseDto,

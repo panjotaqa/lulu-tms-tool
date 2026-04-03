@@ -11,4 +11,4 @@ export const createTestRunCaseRepositoryMock =
       find: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
-    } as unknown as jest.Mocked<ITestRunCaseRepository>);
+    }) as unknown as jest.Mocked<ITestRunCaseRepository>;

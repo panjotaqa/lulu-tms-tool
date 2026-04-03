@@ -25,6 +25,7 @@ import {
 } from '../models/types/project-response.type';
 import type { IProjectService } from '../service/project.service.interface';
 import { ProjectControllerDocs } from './project.controller.doc';
+import { PROJECT_SERVICE } from '@/modules/core/constants/services.constants';
 
 const docs = ProjectControllerDocs();
 
@@ -34,7 +35,7 @@ const docs = ProjectControllerDocs();
 @ApiBearerAuth()
 export class ProjectController {
   constructor(
-    @Inject('IProjectService')
+    @Inject(PROJECT_SERVICE)
     private readonly projectService: IProjectService,
   ) {}
 

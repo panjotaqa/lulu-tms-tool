@@ -28,6 +28,14 @@ export abstract class BaseRepository<
     return this.entityRepository.find(options);
   }
 
+  public findAndCount(options?: FindManyOptions<T>): Promise<[T[], number]> {
+    return this.entityRepository.findAndCount(options);
+  }
+
+  public count(options?: FindManyOptions<T>): Promise<number> {
+    return this.entityRepository.count(options);
+  }
+
   public remove(entity: T): Promise<T> {
     return this.entityRepository.remove(entity);
   }

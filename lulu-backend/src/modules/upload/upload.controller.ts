@@ -22,13 +22,18 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UploadService } from './upload.service';
 import type { MulterFile } from './types/multer-file.type';
+import { Inject } from '@nestjs/common';
+import { UPLOAD_SERVICE } from '@/modules/core/constants/services.constants';
 
 @ApiTags('upload')
 @Controller('upload')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class UploadController {
-  constructor(private readonly uploadService: UploadService) {}
+  constructor(
+    @Inject(UPLOAD_SERVICE)
+    private readonly uploadService: UploadService,
+  ) {}
 
   @Post('test-run-case/:testRunCaseId')
   @HttpCode(HttpStatus.OK)

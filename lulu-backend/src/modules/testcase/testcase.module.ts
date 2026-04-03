@@ -10,6 +10,8 @@ import { TestCaseTag } from './models/entity/testcase-tag.entity';
 import { TestCaseService } from './service/testcase.service';
 import { TestCaseRepository } from './repository/testcase.repository';
 import { TestCaseController } from './controller/testcase.controller';
+import { TESTCASE_SERVICE } from '@/modules/core/constants/services.constants';
+import { TESTCASE_REPOSITORY } from '@/modules/core/constants/repositories.constants';
 
 @Module({
   imports: [
@@ -18,7 +20,11 @@ import { TestCaseController } from './controller/testcase.controller';
     UserModule,
   ],
   controllers: [TestCaseController],
-  providers: [TestCaseService, DebugLoggerService, TestCaseRepository],
-  exports: [TestCaseService, TestCaseRepository],
+  providers: [
+    { provide: TESTCASE_SERVICE, useClass: TestCaseService },
+    { provide: TESTCASE_REPOSITORY, useClass: TestCaseRepository },
+    DebugLoggerService,
+  ],
+  exports: [TESTCASE_SERVICE, TESTCASE_REPOSITORY],
 })
 export class TestCaseModule {}

@@ -7,6 +7,8 @@ import { ProjectController } from './controller/project.controller';
 import { Project } from './models/entity/project.entity';
 import { ProjectService } from './service/project.service';
 import { ProjectRepository } from './repository/project.repository';
+import { PROJECT_SERVICE } from '@/modules/core/constants/services.constants';
+import { PROJECT_REPOSITORY } from '@/modules/core/constants/repositories.constants';
 
 @Module({
   imports: [
@@ -17,23 +19,15 @@ import { ProjectRepository } from './repository/project.repository';
   controllers: [ProjectController],
   providers: [
     {
-      provide: 'IProjectService',
+      provide: PROJECT_SERVICE,
       useClass: ProjectService,
     },
     {
-      provide: 'IProjectRepository',
+      provide: PROJECT_REPOSITORY,
       useClass: ProjectRepository,
     },
-    ProjectService,
-    ProjectRepository,
     DebugLoggerService,
   ],
-  exports: [
-    {
-      provide: 'IProjectService',
-      useClass: ProjectService,
-    },
-    'IProjectRepository', // Also export repo if needed by others
-  ],
+  exports: [PROJECT_SERVICE, PROJECT_REPOSITORY],
 })
 export class ProjectModule {}

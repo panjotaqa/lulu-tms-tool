@@ -1,5 +1,5 @@
 import { IBaseRepository } from '@/modules/core/database/interfaces/base-repository.interface';
-import { Tag } from './models/tag.entity';
+import { Tag } from '../models/tag.entity';
 
 export interface ITagRepository extends IBaseRepository<Tag> {
   findOrCreateByName(name: string): Promise<Tag>;

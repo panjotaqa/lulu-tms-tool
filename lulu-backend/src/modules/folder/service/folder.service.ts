@@ -19,15 +19,17 @@ import {
   FolderTreeResponse,
 } from '../models/types/folder-response.type';
 import { IFolderService } from './folder.service.interface';
-
+import { FOLDER_REPOSITORY } from '@/modules/core/constants/repositories.constants';
+import { PROJECT_SERVICE } from '@/modules/core/constants/services.constants';
+import { USER_SERVICE } from '@/modules/core/constants/services.constants';
 @Injectable()
 export class FolderService implements IFolderService {
   constructor(
-    @Inject('IFolderRepository')
+    @Inject(FOLDER_REPOSITORY)
     private readonly folderRepository: IFolderRepository,
-    @Inject('IProjectService')
+    @Inject(PROJECT_SERVICE)
     private readonly projectService: IProjectService,
-    @Inject('IUserService')
+    @Inject(USER_SERVICE)
     private readonly userService: IUserService,
     private readonly dataSource: DataSource,
     private readonly debugLogger: DebugLoggerService,

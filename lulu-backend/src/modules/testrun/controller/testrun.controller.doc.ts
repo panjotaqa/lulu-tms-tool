@@ -127,7 +127,8 @@ export const TestRunControllerDocs = {
       }),
       ApiResponse({
         status: 200,
-        description: 'Lista de execuções de teste do projeto retornada com sucesso',
+        description:
+          'Lista de execuções de teste do projeto retornada com sucesso',
         schema: {
           example: {
             data: [
@@ -200,7 +201,9 @@ export const TestRunControllerDocs = {
 
   updateTestCaseStatus: () =>
     applyDecorators(
-      ApiOperation({ summary: 'Atualizar status de um caso de teste na execução' }),
+      ApiOperation({
+        summary: 'Atualizar status de um caso de teste na execução',
+      }),
       ApiParam({
         name: 'testRunId',
         type: String,

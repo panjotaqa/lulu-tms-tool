@@ -9,9 +9,11 @@ import {
   Post,
   Query,
   UseGuards,
+  Inject,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { TestCaseControllerDocs } from './testcase.controller.doc';
+import { TESTCASE_SERVICE } from '@/modules/core/constants/services.constants';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator';
 import { CreateTestCaseDto } from '../models/dto/create-testcase.dto';
@@ -32,7 +34,10 @@ import { TestCaseService } from '../service/testcase.service';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class TestCaseController {
-  constructor(private readonly testCaseService: TestCaseService) {}
+  constructor(
+    @Inject(TESTCASE_SERVICE)
+    private readonly testCaseService: TestCaseService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

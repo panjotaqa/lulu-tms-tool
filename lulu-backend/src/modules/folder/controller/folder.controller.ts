@@ -23,6 +23,7 @@ import {
 } from '../models/types/folder-response.type';
 import type { IFolderService } from '../service/folder.service.interface';
 import { FolderControllerDocs } from './folder.controller.doc';
+import { FOLDER_SERVICE } from '@/modules/core/constants/services.constants';
 
 const docs = FolderControllerDocs;
 
@@ -32,7 +33,7 @@ const docs = FolderControllerDocs;
 @ApiBearerAuth()
 export class FolderController {
   constructor(
-    @Inject('IFolderService')
+    @Inject(FOLDER_SERVICE)
     private readonly folderService: IFolderService,
   ) {}
 

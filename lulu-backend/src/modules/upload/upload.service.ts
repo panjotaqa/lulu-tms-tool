@@ -3,20 +3,20 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { Repository } from 'typeorm';
-import { TestRunCase } from '../testrun/models/entity/testrun-case.entity';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import type { MulterFile } from './types/multer-file.type';
+import { Inject } from '@nestjs/common';
+import { TESTRUNCASE_REPOSITORY } from '@/modules/core/constants/repositories.constants';
+import type { ITestRunCaseRepository } from '../testrun/repository/testruncase.repository.interface';
 
 @Injectable()
 export class UploadService {
   private readonly uploadsDir = join(process.cwd(), 'uploads', 'test-runs');
 
   constructor(
-    @InjectRepository(TestRunCase)
-    private readonly testRunCaseRepository: Repository<TestRunCase>,
+    @Inject(TESTRUNCASE_REPOSITORY)
+    private readonly testRunCaseRepository: ITestRunCaseRepository,
   ) {
     // Garantir que o diretório de uploads existe
     if (!existsSync(this.uploadsDir)) {
