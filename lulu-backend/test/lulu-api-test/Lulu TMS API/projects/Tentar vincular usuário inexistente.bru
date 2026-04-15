@@ -16,13 +16,14 @@ auth:bearer {
 
 body:json {
   {
-    "userId": "e01dbbb1-ba69-4c66-b33a-cda7c1a65eec"
+    "email": "{{nonexistentEmail}}"
   }
 }
 
 vars:pre-request {
   baseUrl: http://localhost:3000
   testEmail: test.project.link.notfound@example.com
+  nonexistentEmail: ghost.project.link.notfound@example.com
   testPassword: senhaSegura123
 }
 

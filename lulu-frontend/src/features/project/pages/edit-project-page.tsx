@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { ProjectForm } from '../components/project-form'
+import { ProjectMembersCard } from '../components/project-members-card'
 import { ProjectService, handleProjectError, mapProjectResponseToProject } from '../services/project.service'
 import type { Project, ProjectFormData } from '../types/project.types'
 
@@ -54,6 +55,10 @@ export function EditProjectPage() {
     navigate('/app/projects')
   }
 
+  const handleProjectChange = (updatedProject: Project) => {
+    setProject(updatedProject)
+  }
+
   if (isLoadingProject) {
     return <div className="text-center py-12 text-muted-foreground">Carregando...</div>
   }
@@ -76,6 +81,7 @@ export function EditProjectPage() {
           onCancel={handleCancel}
           isLoading={isLoading}
         />
+        <ProjectMembersCard project={project} onProjectChange={handleProjectChange} />
       </div>
     </div>
   )

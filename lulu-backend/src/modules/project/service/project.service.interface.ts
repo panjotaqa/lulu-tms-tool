@@ -2,6 +2,7 @@ import { CreateProjectDto } from '../models/dto/create-project.dto';
 import { LinkUserDto } from '../models/dto/link-user.dto';
 import { QueryProjectDto } from '../models/dto/query-project.dto';
 import { UpdateProjectDto } from '../models/dto/update-project.dto';
+import { UnlinkUserDto } from '../models/dto/unlink-user.dto';
 import {
   PaginatedProjectResponse,
   ProjectResponse,
@@ -33,6 +34,6 @@ export interface IProjectService {
   ): Promise<ProjectResponse>;
   unlinkUser(
     projectId: string,
-    linkUserDto: LinkUserDto,
+    unlinkUserDto: UnlinkUserDto,
   ): Promise<ProjectResponse>;
 }

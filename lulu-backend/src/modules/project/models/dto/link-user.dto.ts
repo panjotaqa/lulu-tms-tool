@@ -1,13 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class LinkUserDto {
   @ApiProperty({
-    description: 'ID do usuário a ser vinculado',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'Email do usuário a ser vinculado',
+    example: 'maria.santos@example.com',
   })
-  @IsNotEmpty({ message: 'ID do usuário é obrigatório' })
-  @IsString({ message: 'ID do usuário deve ser uma string' })
-  @IsUUID('4', { message: 'ID do usuário deve ser um UUID válido' })
-  userId: string;
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsNotEmpty({ message: 'Email do usuário é obrigatório' })
+  @IsString({ message: 'Email do usuário deve ser uma string' })
+  @IsEmail({}, { message: 'Email deve ter um formato válido' })
+  email: string;
 }

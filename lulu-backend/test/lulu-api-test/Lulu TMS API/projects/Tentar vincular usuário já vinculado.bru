@@ -16,7 +16,7 @@ auth:bearer {
 
 body:json {
   {
-    "userId": "42b88fa8-0f76-4a79-8ad1-a53da544bbf1"
+    "email": "{{userEmailToLink}}"
   }
 }
 
@@ -86,11 +86,11 @@ script:pre-request {
           }
         });
         if (createUser2Response.status === 201) {
-          const userIdToLink = createUser2Response.body.id;
-          bru.setVar("userIdToLink", userIdToLink);
+          const userEmailToLink = createUser2Response.body.email;
+          bru.setVar("userEmailToLink", userEmailToLink);
           await bru.post("{{baseUrl}}/projects/" + bru.getVar("projectId") + "/users", {
             body: {
-              userId: userIdToLink
+              email: userEmailToLink
             },
             options: {
               headers: {

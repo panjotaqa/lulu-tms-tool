@@ -45,10 +45,6 @@ export interface QueryProjectsParams {
   isArchived?: boolean
 }
 
-export interface LinkUserRequest {
-  userId: string
-}
-
 export class ProjectService {
   static async create(data: CreateProjectRequest): Promise<ProjectResponse> {
     return apiRequest<ProjectResponse>('/projects', {
@@ -116,10 +112,10 @@ export class ProjectService {
     })
   }
 
-  static async linkUser(projectId: string, userId: string): Promise<ProjectResponse> {
+  static async linkUser(projectId: string, email: string): Promise<ProjectResponse> {
     return apiRequest<ProjectResponse>(`/projects/${projectId}/users`, {
       method: 'POST',
-      body: JSON.stringify({ userId }),
+      body: JSON.stringify({ email }),
     })
   }
 

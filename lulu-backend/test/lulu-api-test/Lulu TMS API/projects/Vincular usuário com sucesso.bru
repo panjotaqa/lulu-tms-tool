@@ -16,7 +16,7 @@ auth:bearer {
 
 body:json {
   {
-    "userId": "42b88fa8-0f76-4a79-8ad1-a53da544bbf1"
+    "email": "{{userEmailToLink}}"
   }
 }
 
@@ -86,7 +86,7 @@ script:pre-request {
           }
         });
         if (createUser2Response.status === 201) {
-          bru.setVar("userIdToLink", createUser2Response.body.id);
+          bru.setVar("userEmailToLink", createUser2Response.body.email);
         }
       }
     }

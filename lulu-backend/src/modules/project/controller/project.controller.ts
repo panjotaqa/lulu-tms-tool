@@ -19,6 +19,7 @@ import { CreateProjectDto } from '../models/dto/create-project.dto';
 import { LinkUserDto } from '../models/dto/link-user.dto';
 import { QueryProjectDto } from '../models/dto/query-project.dto';
 import { UpdateProjectDto } from '../models/dto/update-project.dto';
+import { UnlinkUserDto } from '../models/dto/unlink-user.dto';
 import {
   PaginatedProjectResponse,
   ProjectResponse,
@@ -115,8 +116,8 @@ export class ProjectController {
   @docs.unlinkUser
   async unlinkUser(
     @Param('id') id: string,
-    @Body() linkUserDto: LinkUserDto,
+    @Body() unlinkUserDto: UnlinkUserDto,
   ): Promise<ProjectResponse> {
-    return this.projectService.unlinkUser(id, linkUserDto);
+    return this.projectService.unlinkUser(id, unlinkUserDto);
   }
 }

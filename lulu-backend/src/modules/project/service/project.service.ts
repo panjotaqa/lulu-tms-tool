@@ -14,6 +14,7 @@ import { CreateProjectDto } from '../models/dto/create-project.dto';
 import { LinkUserDto } from '../models/dto/link-user.dto';
 import { QueryProjectDto } from '../models/dto/query-project.dto';
 import { UpdateProjectDto } from '../models/dto/update-project.dto';
+import { UnlinkUserDto } from '../models/dto/unlink-user.dto';
 import { Project } from '../models/entity/project.entity';
 import { User } from '../../user/models/entity/user.entity';
 import {
@@ -214,21 +215,16 @@ export class ProjectService implements IProjectService {
     if (!project) {
       throw new NotFoundException('Projeto não encontrado');
     }
-    try {
-      await this.userService.findOne(linkUserDto.userId);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException('Usuário não encontrado');
-      }
-      throw error;
+    const userToLink = await this.userService.findByEmail(linkUserDto.email.trim());
+    if (!userToLink) {
+      throw new NotFoundException('Usuário não encontrado');
     }
     const isUserAlreadyLinked = project.users.some(
-      (user) => user.id === linkUserDto.userId,
+      (user) => user.id === userToLink.id,
     );
     if (isUserAlreadyLinked) {
       throw new ConflictException('Usuário já está vinculado ao projeto');
     }
-    const userToLink = await this.userService.findOne(linkUserDto.userId);
     project.users.push(userToLink as unknown as User);
     const updatedProject = await this.projectRepository.save(project);
     return this.mapToResponse(updatedProject);
@@ -236,7 +232,7 @@ export class ProjectService implements IProjectService {
 
   async unlinkUser(
     projectId: string,
-    linkUserDto: LinkUserDto,
+    unlinkUserDto: UnlinkUserDto,
   ): Promise<ProjectResponse> {
     const project = await this.projectRepository.findOne({
       where: { id: projectId },
@@ -245,8 +241,13 @@ export class ProjectService implements IProjectService {
     if (!project) {
       throw new NotFoundException('Projeto não encontrado');
     }
+    if (project.createdBy.id === unlinkUserDto.userId) {
+      throw new BadRequestException(
+        'Não é possível desvincular o criador do projeto',
+      );
+    }
     try {
-      await this.userService.findOne(linkUserDto.userId);
+      await this.userService.findOne(unlinkUserDto.userId);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException('Usuário não encontrado');
@@ -254,13 +255,13 @@ export class ProjectService implements IProjectService {
       throw error;
     }
     const isUserLinked = project.users.some(
-      (user) => user.id === linkUserDto.userId,
+      (user) => user.id === unlinkUserDto.userId,
     );
     if (!isUserLinked) {
       throw new BadRequestException('Usuário não está vinculado ao projeto');
     }
     project.users = project.users.filter(
-      (user) => user.id !== linkUserDto.userId,
+      (user) => user.id !== unlinkUserDto.userId,
     );
     const updatedProject = await this.projectRepository.save(project);
     return this.mapToResponse(updatedProject);

@@ -1,5 +1,11 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 export function ProjectControllerDocs() {
   return {
@@ -278,6 +284,13 @@ export function ProjectControllerDocs() {
         type: String,
         example: '123e4567-e89b-12d3-a456-426614174000',
       }),
+      ApiBody({
+        schema: {
+          example: {
+            email: 'maria.santos@example.com',
+          },
+        },
+      }),
       ApiResponse({
         status: 200,
         description: 'Usuário vinculado com sucesso',
@@ -332,6 +345,13 @@ export function ProjectControllerDocs() {
         name: 'id',
         type: String,
         example: '123e4567-e89b-12d3-a456-426614174000',
+      }),
+      ApiBody({
+        schema: {
+          example: {
+            userId: '123e4567-e89b-12d3-a456-426614174002',
+          },
+        },
       }),
       ApiResponse({
         status: 200,
