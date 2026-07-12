@@ -1,0 +1,29 @@
+meta {
+  name: Buscar bug por id
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/bugs/{{bugId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+}
+
+tests {
+  test("deve retornar bug por id", () => {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.id).to.equal(bru.getVar('bugId'));
+    expect(body).to.have.property('bugId');
+    expect(body).to.have.property('createdBy');
+  });
+}

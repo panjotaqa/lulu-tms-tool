@@ -1,0 +1,32 @@
+meta {
+  name: Listar bugs por projeto
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/bugs?projectId={{projectId}}&page=1&limit=10
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+}
+
+tests {
+  test("deve listar bugs do projeto", () => {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body).to.have.property('data');
+    expect(body.data).to.be.an('array');
+    expect(body).to.have.property('total');
+    expect(body.total).to.be.at.least(1);
+    expect(body).to.have.property('page', 1);
+    expect(body).to.have.property('limit', 10);
+  });
+}

@@ -1,0 +1,25 @@
+meta {
+  name: Deletar bug
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/bugs/{{bugId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+}
+
+tests {
+  test("deve deletar bug com sucesso", () => {
+    expect(res.getStatus()).to.equal(204);
+  });
+}

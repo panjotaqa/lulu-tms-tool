@@ -1,0 +1,38 @@
+meta {
+  name: Atualizar bug
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/bugs/{{bugId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "status": "InProgress",
+    "severity": "Critical",
+    "tags": ["Hotfix"]
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+}
+
+tests {
+  test("deve atualizar bug com sucesso", () => {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.status).to.equal('InProgress');
+    expect(body.severity).to.equal('Critical');
+    expect(body.tags).to.have.length(1);
+    expect(body.tags[0].name).to.equal('Hotfix');
+  });
+}

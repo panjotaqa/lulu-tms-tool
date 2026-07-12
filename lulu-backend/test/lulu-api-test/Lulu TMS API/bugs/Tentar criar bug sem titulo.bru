@@ -1,0 +1,31 @@
+meta {
+  name: Tentar criar bug sem titulo
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/bugs
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "projectId": "{{projectId}}"
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+}
+
+tests {
+  test("deve retornar erro de validação", () => {
+    expect(res.getStatus()).to.equal(400);
+  });
+}

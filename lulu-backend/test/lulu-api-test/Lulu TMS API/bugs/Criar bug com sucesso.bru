@@ -1,0 +1,44 @@
+meta {
+  name: Criar bug com sucesso
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/bugs
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "title": "Bug de teste {{$timestamp}}",
+    "projectId": "{{projectId}}",
+    "description": "Descrição do bug criado via Bruno",
+    "tags": ["Regression", "UI"]
+  }
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:3000
+}
+
+tests {
+  test("deve criar bug com sucesso", () => {
+    expect(res.getStatus()).to.equal(201);
+    const body = res.getBody();
+    expect(body).to.have.property('id');
+    expect(body).to.have.property('bugId');
+    expect(body.bugId).to.match(/-BUG-\d{2}$/);
+    expect(body).to.have.property('title');
+    expect(body.status).to.equal('Open');
+    expect(body.projectId).to.equal(bru.getVar('projectId'));
+    expect(body.tags).to.be.an('array');
+    expect(body.tags.length).to.equal(2);
+    bru.setVar('bugId', body.id);
+  });
+}

@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './controller/app.controller';
 import { AppService } from './service/app.service';
 import { ApplicationModule } from '@/modules/application/application.module';
+import { BugModule } from '@/modules/bug/bug.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { DatabaseModule } from '@/modules/core/database/database.module';
 import { FolderModule } from '@/modules/folder/folder.module';
@@ -28,6 +29,7 @@ import { UserModule } from '@/modules/user/user.module';
     TestRunModule,
     UploadModule,
     ApplicationModule,
+    BugModule,
   ],
   controllers: [AppController],
   providers: [AppService],

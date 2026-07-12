@@ -7,3 +7,4 @@ export const TAG_SERVICE = 'TAG_SERVICE';
 export const AUTH_SERVICE = 'AUTH_SERVICE';
 export const FOLDER_SERVICE = 'FOLDER_SERVICE';
 export const UPLOAD_SERVICE = 'UPLOAD_SERVICE';
+export const BUG_SERVICE = 'BUG_SERVICE';
